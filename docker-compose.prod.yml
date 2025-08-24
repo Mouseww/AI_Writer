@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ai_writer
+      MYSQL_USER: ai_writer
+      MYSQL_PASSWORD: hnMRLCbKPa7a2HhY
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  backend:
+    image: webber896/aiwriter-backend:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db;Port=3306;Database=ai_writer;User=ai_writer;Password=hnMRLCbKPa7a2HhY;
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    image: webber896/aiwriter-frontend:latest
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    
+volumes:
+  mysql_data:

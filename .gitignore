@@ -1,0 +1,19 @@
+# Binaries and object files
+**/bin/
+**/obj/
+
+# Node.js modules
+**/node_modules/
+
+# Visual Studio files
+**/.vs/
+
+# Rider files
+**/.idea/
+
+# Other common build/temp files
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.swp
+**/*~
