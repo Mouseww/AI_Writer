@@ -83,7 +83,7 @@ namespace AIWriter.Services
                                 AgentId = optimizer.Id,
                                 Content = "满意",
                                 Timestamp = DateTime.UtcNow,
-                            Abstract = writerOutput
+                                Abstract = "满意"
                             });
                         }
 

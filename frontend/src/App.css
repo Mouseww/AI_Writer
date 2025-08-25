@@ -240,4 +240,91 @@ hr {
     .app-content {
         padding: 0 15px; /* Smaller padding for tablets and mobile */
     }
+
+    /* Header responsive adjustments */
+    nav {
+        padding: 0 1rem;
+    }
+
+    nav .nav-brand {
+        font-size: 1.2rem;
+    }
+
+    nav ul {
+        gap: 0.8rem;
+    }
+
+    /* Table responsive styling */
+    .ant-table {
+        font-size: 0.9rem;
+    }
+
+    /* Button size adjustments for mobile */
+    button, .ant-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    /* Title size adjustments */
+    h1, h2, h3, .ant-typography {
+        font-size: calc(1rem + 1vw) !important;
+    }
+}
+
+/* Smaller mobile devices */
+@media (max-width: 480px) {
+    .app-content {
+        padding: 0 10px;
+    }
+
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+        padding: 8px 4px;
+    }
+
+    /* Stack action buttons on very small screens */
+    .ant-space {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ant-space-item {
+        margin-bottom: 5px !important;
+    }
+}
+
+/* Animation transitions */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 300ms ease-in;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+
+/* Loading animations */
+.loading-pulse {
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
 }

@@ -17,3 +17,5 @@
 **/*.bak
 **/*.swp
 **/*~
+backend/appsettings.Development.json
+backend/appsettings.json

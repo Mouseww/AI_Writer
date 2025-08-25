@@ -32,14 +32,13 @@ namespace AIWriter.Controllers
             var userId = GetUserId();
             var novels = await _context.Novels
                 .Where(n => n.UserId == userId)
-                .Include(n => n.Chapters) // Eager load chapters
                 .ToListAsync();
 
             // Calculate word count and get latest chapter title for each novel
             foreach (var novel in novels)
             {
-                novel.TotalWordCount = novel.Chapters.Sum(c => c.WordCount);
-                novel.LatestChapterTitle = novel.Chapters
+                novel.TotalWordCount = _context.Chapters.Where(x=>x.NovelId==novel.Id).Sum(c => c.WordCount);
+                novel.LatestChapterTitle = _context.Chapters.Where(c => c.NovelId == novel.Id)
                                                 .OrderByDescending(c => c.Order)
                                                 .Select(c => c.Title)
                                                 .FirstOrDefault();
