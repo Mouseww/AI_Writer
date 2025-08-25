@@ -110,6 +110,8 @@ namespace AIWriter.Models
 
         public string Abstract { get; set; }
 
+        public bool ShowInHistory { get; set; } = true;
+
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public bool IsUserMessage { get; set; } = false;
     }

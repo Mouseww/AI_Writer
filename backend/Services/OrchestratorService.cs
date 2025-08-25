@@ -82,7 +82,8 @@ namespace AIWriter.Services
                                 NovelId = novelId,
                                 AgentId = optimizer.Id,
                                 Content = "满意",
-                                Timestamp = DateTime.UtcNow
+                                Timestamp = DateTime.UtcNow,
+                            Abstract = writerOutput
                             });
                         }
 
@@ -93,7 +94,8 @@ namespace AIWriter.Services
                             NovelId = novelId,
                             AgentId = writer.Id,
                             Content = writerOutput,
-                            Timestamp = DateTime.UtcNow
+                            Timestamp = DateTime.UtcNow,
+                            Abstract = writerOutput
                         });
 
 
@@ -107,16 +109,17 @@ namespace AIWriter.Services
                             NovelId = novelId,
                             AgentId = optimizer.Id,
                             Content = optimizerOutput,
-                            Timestamp = DateTime.UtcNow
+                            Timestamp = DateTime.UtcNow,
+                            Abstract = optimizerOutput
                         });
+
+
 
                         passed = !optimizerOutput.Contains("不满意") && optimizerOutput.Contains("满意");
                         if (!passed && !cancellationToken.IsCancellationRequested)
                         {
                             continue;
                         }
-
-
 
 
                         // Extract title and content from writerOutput
@@ -127,7 +130,7 @@ namespace AIWriter.Services
                         string title;
                         string content;
 
-                        if (match.Success && match.Groups.Count > 1)
+                        if (passed&&match.Success && match.Groups.Count > 1)
                         {
                             title = match.Groups[1].Value.Split("(")[0];
                             content = writerOutput.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
@@ -142,6 +145,7 @@ namespace AIWriter.Services
                             await SaveHistory(dbContext, novelId, optimizer.Id, optimizerOutput);
                             continue;
                         }
+
 
                         var lastChapter = await dbContext.Chapters
                             .Where(c => c.NovelId == novelId)
