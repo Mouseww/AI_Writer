@@ -117,7 +117,6 @@ namespace AIWriter.Services
                         }
 
 
-                        await SaveHistory(dbContext, novelId, optimizer.Id, optimizerOutput);
 
 
                         // Extract title and content from writerOutput
@@ -133,12 +132,14 @@ namespace AIWriter.Services
                             title = match.Groups[1].Value.Split("(")[0];
                             content = writerOutput.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
                             content = content.Split("---")[0];
-                            string abstractStr = await aiClient.GenerateText(abstracter.Model, abstracter.Prompt, $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}");
+                            string abstractStr = await aiClient.GenerateText(optimizer.Model, abstracter.Prompt, $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}");
                             await SaveHistory(dbContext, novelId, writer.Id, writerOutput, abstractStr);
+                            await SaveHistory(dbContext, novelId, optimizer.Id, optimizerOutput);
                         }
                         else
                         {
                             await SaveHistory(dbContext, novelId, writer.Id, writerOutput);
+                            await SaveHistory(dbContext, novelId, optimizer.Id, optimizerOutput);
                             continue;
                         }
 
