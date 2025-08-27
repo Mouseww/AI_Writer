@@ -1,6 +1,8 @@
 using AIWriter.Data;
+using AIWriter.Dtos;
 using AIWriter.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
@@ -19,7 +21,7 @@ namespace AIWriter.Services
             _scopeFactory = scopeFactory;
         }
 
-        public async Task<string> GenerateText(string model, string systemPrompt, string userPrompt, int retry = 0)
+        public async Task<string> GenerateText(string model, List<Message> messages, int retry = 0)
         {
             using (var scope = _scopeFactory.CreateScope())
             {
@@ -33,11 +35,11 @@ namespace AIWriter.Services
                 var requestBody = new
                 {
                     model = model,
-                    messages = new[]
-                    {
-                        new { role = "system", content = systemPrompt },
-                        new { role = "user", content = userPrompt }
-                    }
+                    messages = messages,
+                    temperature = 0.7,
+                    top_p = 1,
+                    frequency_penalty = 0.8,
+                    presence_penalty = 0.5
                 };
 
                 var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
@@ -58,7 +60,7 @@ namespace AIWriter.Services
                         if (retry < maxRetry)
                         {
                             retry++;
-                            return await GenerateText(model, systemPrompt, userPrompt, retry);
+                            return await GenerateText(model, messages, retry);
                         }
 
                         var errorBody = await response.Content.ReadAsStringAsync();
@@ -78,7 +80,7 @@ namespace AIWriter.Services
                                 if (retry < maxRetry)
                                 {
                                     retry++;
-                                    return await GenerateText(model, systemPrompt, userPrompt, retry);
+                                    return await GenerateText(model, messages, retry);
                                 }
 
                                 return "[ERROR: Could not parse content from AI response.]";
@@ -93,7 +95,7 @@ namespace AIWriter.Services
                     {
                         retry++;
                         await Task.Delay(1000);
-                        return await GenerateText(model, systemPrompt, userPrompt, retry);
+                        return await GenerateText(model, messages, retry);
                     }
 
                     return "[ERROR: Could not parse AI response. Unexpected format.]";
@@ -103,7 +105,7 @@ namespace AIWriter.Services
                     if (retry < maxRetry)
                     {
                         retry++;
-                        return await GenerateText(model, systemPrompt, userPrompt, retry);
+                        return await GenerateText(model, messages, retry);
                     }
 
                     return $"[ERROR: An exception occurred while calling the AI API: {ex.Message}]";

@@ -14,6 +14,7 @@ interface HistoryItem {
     id: number;
     agent: { name: string } | null;
     content: string;
+    abstract: string;
     timestamp: string;
     isUserMessage: boolean;
 }

@@ -37,7 +37,7 @@ namespace AIWriter.Controllers
             // Calculate word count and get latest chapter title for each novel
             foreach (var novel in novels)
             {
-                novel.TotalWordCount = _context.Chapters.Where(x=>x.NovelId==novel.Id).Sum(c => c.WordCount);
+                novel.TotalWordCount = _context.Chapters.Where(x => x.NovelId == novel.Id).Sum(c => c.WordCount);
                 novel.LatestChapterTitle = _context.Chapters.Where(c => c.NovelId == novel.Id)
                                                 .OrderByDescending(c => c.Order)
                                                 .Select(c => c.Title)
@@ -52,11 +52,10 @@ namespace AIWriter.Controllers
         public async Task<IActionResult> GetNovel(int id)
         {
             var userId = GetUserId();
-            var novel = await _context.Novels
-                .Include(n => n.Chapters)
-                .Include(n => n.ConversationHistories)
-                    .ThenInclude(h => h.Agent)
-                .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
+            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
+            novel.Chapters = await _context.Chapters.Where(c => c.NovelId == novel.Id).ToListAsync();
+            novel.ConversationHistories = await _context.ConversationHistories.Where(c => c.NovelId == novel.Id).ToListAsync();
+
 
             if (novel == null)
             {
@@ -159,102 +158,7 @@ namespace AIWriter.Controllers
             return int.Parse(userIdClaim.Value);
         }
 
-        // POST: api/novels/5/start-writing
-        [HttpPost("{id}/start-writing")]
-        public async Task<IActionResult> StartWriting(int id)
-        {
-            var userId = GetUserId();
-            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
 
-            if (novel == null)
-            {
-                return NotFound();
-            }
-
-            novel.Status = "Writing"; // Set status to Writing
-            await _context.SaveChangesAsync();
-
-            // Potentially trigger OrchestratorService to start writing process
-            // _orchestratorService.StartWriting(id); 
-
-            return NoContent();
-        }
-
-        // POST: api/novels/5/pause-writing
-        [HttpPost("{id}/pause-writing")]
-        public async Task<IActionResult> PauseWriting(int id)
-        {
-            var userId = GetUserId();
-            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
-
-            if (novel == null)
-            {
-                return NotFound();
-            }
-
-            novel.Status = "Paused"; // Set status to Paused
-            await _context.SaveChangesAsync();
-
-            // Potentially trigger OrchestratorService to pause writing process
-            // _orchestratorService.PauseWriting(id);
-
-            return NoContent();
-        }
-
-        // POST: api/novels/5/write
-        [HttpPost("{id}/write")]
-        public async Task<IActionResult> Write(int id, [FromBody] WriteRequestDto writeDto)
-        {
-            var userId = GetUserId();
-            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
-            if (novel == null)
-            {
-                return NotFound();
-            }
-
-            var writerAgent = await _context.Agents.Where(a => a.UserId == userId).OrderBy(a => a.Order).FirstOrDefaultAsync();
-            if (writerAgent == null)
-                return BadRequest("No writer agent configured.");
-
-            // Save user prompt to history
-            var userHistory = new ConversationHistory
-            {
-                NovelId = id,
-                Content = writeDto.Prompt,
-                Timestamp = DateTime.UtcNow,
-                IsUserMessage = true
-            };
-            _context.ConversationHistories.Add(userHistory);
-
-            var history = await _context.ConversationHistories
-                .Where(h => h.NovelId == id)
-                .OrderByDescending(h => h.Timestamp)
-                .Take(10) // Get last 10 messages for context
-                .ToListAsync();
-
-            var writerPrompt = BuildWriterPrompt(novel, history);
-            var writerOutput = await _aiClientService.GenerateText(writerAgent.Model, writerAgent.Prompt, writerPrompt);
-
-            // Save AI response to history
-            var aiHistory = new ConversationHistory
-            {
-                NovelId = id,
-                AgentId = writerAgent.Id,
-                Content = writerOutput,
-                Timestamp = DateTime.UtcNow
-            };
-            _context.ConversationHistories.Add(aiHistory);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { content = writerOutput });
-        }
-
-        private string BuildWriterPrompt(Novel novel, List<ConversationHistory> history)
-        {
-            var historyString = string.Join("\n", history.Select(h => h.IsUserMessage ? $"User: {h.Content}" : $"AI: {h.Content}"));
-            return $"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\nConversation History:\n{historyString}\n\nContinue the story.";
-        }
 
         // POST: api/novels/5/chapters
         [HttpPost("{id}/chapters")]
@@ -395,6 +299,43 @@ namespace AIWriter.Controllers
             int otherCount = Regex.Matches(text, @"[a-zA-Z0-9]+").Count;
 
             return chineseCount + otherCount;
+        }
+
+        [HttpPost("{id}/workflow/history/{historyId}/regenerate-abstract")]
+        public async Task<IActionResult> RegenerateAbstract(int id, int historyId)
+        {
+            var userId = GetUserId();
+
+            var novelId = (await _context.Novels
+                .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId))?.Id;
+            var historyItem = await _context.ConversationHistories
+                .FirstOrDefaultAsync(h => h.Id == historyId && h.NovelId == novelId);
+
+            if (historyItem == null)
+            {
+                return NotFound();
+            }
+
+            var novel = await _context.Novels.FindAsync(id);
+            var abstracter = await _context.Agents.FirstOrDefaultAsync(a => a.UserId == userId && a.Order == 2);
+
+            if (abstracter == null)
+            {
+                return BadRequest("Abstracter agent not found.");
+            }
+
+            var messages = new List<Message>
+            {
+                new Message { Role = "system", Content = abstracter.Prompt },
+                new Message { Role = "user", Content = $"标题：\r\n{novel.Title}\r\n\r\n正文：\r\n{historyItem.Content}" }
+            };
+
+            var newAbstract = await _aiClientService.GenerateText(abstracter.Model, messages);
+
+            historyItem.Abstract = newAbstract;
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

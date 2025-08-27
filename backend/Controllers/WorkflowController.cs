@@ -56,7 +56,7 @@ namespace AIWriter.Controllers
                 .Where(h => h.NovelId == novelId)
                 .OrderByDescending(h => h.Timestamp)
                 .Take(20)
-                .Select(h => new { h.Id, AgentName = h.Agent.Name, h.Content, h.Timestamp })
+                .Select(h => new { h.Id, AgentName = h.Agent.Name, h.Content, h.Timestamp ,h.Abstract })
                 .ToListAsync();
 
             return Ok(new { novel.Status, History = history });

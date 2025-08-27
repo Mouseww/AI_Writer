@@ -1,7 +1,9 @@
 ﻿using AIWriter.Data;
+using AIWriter.Dtos;
 using AIWriter.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -87,8 +89,8 @@ namespace AIWriter.Services
                             });
                         }
 
-                        var writerPrompt = BuildPrompt(novel, history);
-                        var writerOutput = await aiClient.GenerateText(writer.Model, writer.Prompt, writerPrompt);
+                        var writerMessages = BuildMessages(novel, writer, history);
+                        var writerOutput = await aiClient.GenerateText(writer.Model, writerMessages);
                         history.Insert(0, new ConversationHistory
                         {
                             NovelId = novelId,
@@ -101,8 +103,8 @@ namespace AIWriter.Services
 
 
                         // 2. Optimizer Agent
-                        var optimizerPrompt = BuildPrompt(novel, history);
-                        var optimizerOutput = await aiClient.GenerateText(optimizer.Model, optimizer.Prompt, optimizerPrompt);
+                        var optimizerMessages = BuildMessages(novel, optimizer, history);
+                        var optimizerOutput = await aiClient.GenerateText(optimizer.Model, optimizerMessages);
 
                         history.Insert(0, new ConversationHistory
                         {
@@ -123,19 +125,35 @@ namespace AIWriter.Services
 
 
                         // Extract title and content from writerOutput
-                        var titleRegex = new Regex(@"\*\*(第[一二三四五六七八九十百千万]+章\s*[^*]+)\*\*");
+                        var titleRegex = new Regex(@"(第[一二三四五六七八九十百千万]+章\s*[^*]+)");
 
                         var match = titleRegex.Match(writerOutput);
+                        if (!match.Success || match.Groups.Count < 1)
+                        {
+                            match = titleRegex.Match(optimizerOutput);
+                        }
 
                         string title;
                         string content;
 
-                        if (passed&&match.Success && match.Groups.Count > 1)
+                        if (passed && match.Success && match.Groups.Count > 1)
                         {
-                            title = match.Groups[1].Value.Split("(")[0];
+                            title = match.Groups[1].Value;
                             content = writerOutput.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
                             content = content.Split("---")[0];
-                            string abstractStr = await aiClient.GenerateText(optimizer.Model, abstracter.Prompt, $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}");
+                            if (content.Length < 3000)
+                            {
+                                history[0].Content += "字数不足";
+                                continue;
+                            }
+
+
+                            var abstracterMessages = new List<Message>
+                            {
+                                new Message { Role = "system", Content = abstracter.Prompt },
+                                new Message { Role = "user", Content = $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}" }
+                            };
+                            string abstractStr = await aiClient.GenerateText(abstracter.Model, abstracterMessages);
                             await SaveHistory(dbContext, novelId, writer.Id, writerOutput, abstractStr);
                             await SaveHistory(dbContext, novelId, optimizer.Id, optimizerOutput);
                         }
@@ -199,66 +217,33 @@ namespace AIWriter.Services
             return chineseCount + otherCount;
         }
 
-        private string BuildPrompt(Novel novel, List<ConversationHistory> historys)
+        private List<Message> BuildMessages(Novel novel, Agent agent, List<ConversationHistory> histories)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\n");
-
-            if (historys.Any())
+            var messages = new List<Message>
             {
+                new Message { Role = "system", Content = agent.Prompt }
+            };
 
-                var tempHistories = historys.OrderBy(x => x.Timestamp).ToList();
-                foreach (var history in tempHistories.Take(historys.Count - 1))
+            messages.Add(new Message { Role = "user", Content = $"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\n" });
+
+            if (histories.Any())
+            {
+                var tempHistories = histories.OrderBy(x => x.Timestamp).ToList();
+                foreach (var history in tempHistories.Take(tempHistories.Count - 4))
                 {
-                    stringBuilder.AppendLine("-----------------");
-                    stringBuilder.AppendLine($@"{history.Abstract}");
-                    stringBuilder.AppendLine("-----------------");
-
+                    messages.Add(new Message { Role = agent.Id == history.AgentId ? "assistant" : "user", Content = history.Abstract });
                 }
 
-                stringBuilder.AppendLine("-----------------");
-                stringBuilder.AppendLine($@"{tempHistories.Last().Content}");
-                stringBuilder.AppendLine("-----------------");
+                foreach (var history in tempHistories.Skip(tempHistories.Count - 4))
+                {
+                    messages.Add(new Message { Role = agent.Id == history.AgentId ? "assistant" : "user", Content = history.Content });
+                }
             }
 
-            // Simple prompt for now, can be expanded
-            return stringBuilder.ToString();
+            return messages;
         }
 
-        private string BuildOptimizerPrompt(Novel novel, List<ConversationHistory> historys)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\n");
-            foreach (var history in historys)
-            {
-                stringBuilder.AppendLine("-----------------");
-                stringBuilder.AppendLine($@"{history.Content}");
-                stringBuilder.AppendLine("-----------------");
 
-            }
-
-            stringBuilder.AppendLine(@$"Please review and optimize the following text for clarity, style, and grammar");
-            // Simple prompt for now, can be expanded
-            return stringBuilder.ToString();
-        }
-
-        private string BuildApproverPrompt(Novel novel, List<ConversationHistory> historys)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\n");
-            foreach (var history in historys)
-            {
-                stringBuilder.AppendLine("-----------------");
-                stringBuilder.AppendLine($@"{history.Content}");
-                stringBuilder.AppendLine("-----------------");
-
-            }
-
-            stringBuilder.AppendLine(@$"Please review the following text. If it is good, respond with 'APPROVED'. Otherwise, provide feedback for improvement.");
-            // Simple prompt for now, can be expanded
-            return stringBuilder.ToString();
-            //return $"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\nPlease review the following text. If it is good, respond with 'APPROVED'. Otherwise, provide feedback for improvement.\n\nOriginal:\n{history.FirstOrDefault(h => h.AgentId != 0)?.Content}\n\nOptimized:\n{history.FirstOrDefault(h => h.AgentId != 0)?.Content}";
-        }
 
         private async Task<ConversationHistory> SaveHistory(ApplicationDbContext context, int novelId, int agentId, string content, string abstractStr = null)
         {
