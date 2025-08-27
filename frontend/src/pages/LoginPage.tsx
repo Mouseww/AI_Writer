@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Alert } from 'antd';
@@ -9,6 +10,7 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+    const { t } = useTranslation();
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -20,13 +22,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             onLogin(token);
             navigate('/');
         } catch (err: any) {
-            setError(err.response?.data || 'Login failed. Please check your credentials.');
+            setError(err.response?.data || t('Login failed. Please check your credentials.'));
         }
     };
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Card title="Login" style={{ width: 400 }}>
+            <Card title={t('Login')} style={{ width: 400 }}>
                 <Form
                     name="login"
                     onFinish={onFinish}
@@ -34,19 +36,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                     {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 24 }} />}
                     <Form.Item
                         name="username"
-                        rules={[{ required: true, message: 'Please input your Username!' }]}
+                        rules={[{ required: true, message: t('Please input your Username!') }]}
                     >
-                        <Input prefix={<UserOutlined />} placeholder="Username" />
+                        <Input prefix={<UserOutlined />} placeholder={t("Username")} />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={[{ required: true, message: 'Please input your Password!' }]}
+                        rules={[{ required: true, message: t('Please input your Password!') }]}
                     >
-                        <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                        <Input.Password prefix={<LockOutlined />} placeholder={t("Password")} />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-                            Log in
+                            {t('Log in')}
                         </Button>
                     </Form.Item>
                 </Form>

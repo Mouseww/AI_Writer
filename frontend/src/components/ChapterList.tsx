@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getChapters, updateChapter, deleteChapter } from '../services/api';
 import { Chapter } from '../types';
-import { List, Card, Typography, Button, Modal, Form, Input, Popconfirm, message } from 'antd';
+import { List, Typography, Button, Popconfirm, message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -13,10 +14,8 @@ interface ChapterListProps {
 }
 
 const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh }) => {
+    const { t } = useTranslation();
     const [chapters, setChapters] = useState<Chapter[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
-    const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const fetchChapters = async () => {
@@ -24,7 +23,7 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh }) => {
             const response = await getChapters(novelId);
             setChapters(response.data);
         } catch (error) {
-            console.error("Failed to fetch chapters", error);
+            console.error(t("Failed to fetch chapters"), error);
         }
     };
 
@@ -32,45 +31,19 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh }) => {
         fetchChapters();
     }, [novelId, refresh]);
 
-    const handleEdit = (chapter: Chapter) => {
-        setEditingChapter(chapter);
-        form.setFieldsValue({ title: chapter.title });
-        setIsModalVisible(true);
-    };
-
     const handleDelete = async (chapterId: number) => {
         try {
             await deleteChapter(novelId, chapterId);
-            message.success('Chapter deleted successfully');
+            message.success(t('Chapter deleted successfully'));
             fetchChapters();
         } catch (error) {
-            message.error('Failed to delete chapter');
+            message.error(t('Failed to delete chapter'));
         }
-    };
-
-    const handleOk = async () => {
-        try {
-            const values = await form.validateFields();
-            if (editingChapter) {
-                await updateChapter(novelId, editingChapter.id, values.title, editingChapter.content);
-                message.success('Chapter updated successfully');
-                setIsModalVisible(false);
-                setEditingChapter(null);
-                fetchChapters();
-            }
-        } catch (error) {
-            message.error('Failed to update chapter');
-        }
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-        setEditingChapter(null);
     };
 
     return (
         <div>
-            <Title level={3}>章节列表</Title>
+            <Title level={3}>{t('章节列表')}</Title>
             <List
                 itemLayout="horizontal"
                 dataSource={chapters}
@@ -78,23 +51,23 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh }) => {
                     <List.Item
                         actions={[
                             <Button icon={<EditOutlined />} onClick={() => navigate(`/editor/novel/${novelId}/chapter/${chapter.id}`)}>
-                                编辑
+                                {t('编辑')}
                             </Button>,
                             <Popconfirm
-                                title="Are you sure to delete this chapter?"
+                                title={t("Are you sure to delete this chapter?")}
                                 onConfirm={() => handleDelete(chapter.id)}
-                                okText="Yes"
-                                cancelText="No"
+                                okText={t("Yes")}
+                                cancelText={t("No")}
                             >
                                 <Button icon={<DeleteOutlined />} danger>
-                                    删除
+                                    {t('删除')}
                                 </Button>
                             </Popconfirm>
                         ]}
                     >
                         <List.Item.Meta
                             title={<Link to={`/novel/${novelId}/chapter/${chapter.id}`}>{chapter.title}</Link>}
-                            description={`字数: ${chapter.wordCount}`}
+                            description={`${t('字数:')} ${chapter.wordCount}`}
                         />
                     </List.Item>
                 )}

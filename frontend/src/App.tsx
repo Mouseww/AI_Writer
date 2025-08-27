@@ -28,11 +28,11 @@ const AppContent: React.FC = () => {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUser({ username: payload.sub });
       } catch (e) {
-        console.error('Invalid token', e);
+        console.error(t('Invalid token'), e);
         localStorage.removeItem('token');
       }
     }
-  }, []);
+  }, [t]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -46,7 +46,7 @@ const AppContent: React.FC = () => {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setUser({ username: payload.sub });
     } catch (e) {
-      console.error('Invalid token on login', e);
+      console.error(t('Invalid token on login'), e);
     }
   };
 
@@ -63,8 +63,8 @@ const AppContent: React.FC = () => {
 
   const langMenu = (
     <Menu>
-      <Menu.Item key="en" onClick={() => i18n.changeLanguage('en')}>English</Menu.Item>
-      <Menu.Item key="zh" onClick={() => i18n.changeLanguage('zh')}>中文</Menu.Item>
+      <Menu.Item key="en" onClick={() => i18n.changeLanguage('en')}>{t('English')}</Menu.Item>
+      <Menu.Item key="zh" onClick={() => i18n.changeLanguage('zh')}>{t('中文')}</Menu.Item>
     </Menu>
   );
 
@@ -74,7 +74,7 @@ const AppContent: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '20px', marginRight: '20px' }}>
             {/* Placeholder for Logo */}
-            <Link to="/" style={{ color: 'inherit' }}>AIWriter</Link>
+            <Link to="/" style={{ color: 'inherit' }}>{t('AIWriter')}</Link>
           </div>
           {user && (
             <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['/']} selectedKeys={[window.location.pathname]} style={{ flex: 1, minWidth: 0 }}>
