@@ -112,13 +112,14 @@ const resources = {
       // CreateNovelPage
       "Failed to create novel. Please try again.": "Failed to create novel. Please try again.",
       "Create a New Novel": "Create a New Novel",
-      "Title:": "Title:",
-      "Description:": "Description:",
+      "Description": "Description",
       "Create Novel": "Create Novel",
+      "Novel created successfully!": "Novel created successfully!",
 
       // EditNovelPage
       "Failed to update novel. Please try again.": "Failed to update novel. Please try again.",
       "Save Changes": "Save Changes",
+      "Novel updated successfully!": "Novel updated successfully!",
 
       // LoginPage
       "Login failed. Please check your credentials.": "Login failed. Please check your credentials.",
@@ -142,6 +143,8 @@ const resources = {
       "e.g., https://api.openai.com/v1": "e.g., https://api.openai.com/v1",
       "API Key:": "API Key:",
       "Save Settings": "Save Settings",
+      "Please input your AI Proxy URL!": "Please input your AI Proxy URL!",
+      "Please input your API Key!": "Please input your API Key!",
 
       // ChapterList
       "Failed to fetch chapters": "Failed to fetch chapters",
@@ -269,13 +272,14 @@ const resources = {
       // CreateNovelPage
       "Failed to create novel. Please try again.": "创建小说失败，请重试。",
       "Create a New Novel": "创建一本新小说",
-      "Title:": "标题:",
-      "Description:": "描述:",
+      "Description": "描述",
       "Create Novel": "创建小说",
+      "Novel created successfully!": "小说创建成功！",
 
       // EditNovelPage
       "Failed to update novel. Please try again.": "更新小说失败，请重试。",
       "Save Changes": "保存更改",
+      "Novel updated successfully!": "小说更新成功！",
 
       // LoginPage
       "Login failed. Please check your credentials.": "登录失败，请检查您的凭据。",
@@ -299,6 +303,8 @@ const resources = {
       "e.g., https://api.openai.com/v1": "例如，https://api.openai.com/v1",
       "API Key:": "API 密钥:",
       "Save Settings": "保存设置",
+      "Please input your AI Proxy URL!": "请输入您的 AI 代理 URL！",
+      "Please input your API Key!": "请输入您的 API 密钥！",
 
       // ChapterList
       "Failed to fetch chapters": "获取章节列表失败",

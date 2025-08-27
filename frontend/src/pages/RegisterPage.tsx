@@ -24,8 +24,8 @@ const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Card title={t('Register')} style={{ width: 400 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', padding: '20px' }}>
+            <Card title={t('Register')} style={{ width: '100%', maxWidth: 400 }}>
                 <Form
                     name="register"
                     onFinish={onFinish}

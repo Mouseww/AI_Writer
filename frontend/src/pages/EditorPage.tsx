@@ -196,14 +196,14 @@ const EditorPage: React.FC = () => {
     };
 
     return (
-        <Row gutter={24}>
-            <Col span={16}>
+        <Row gutter={[24, 24]}>
+            <Col xs={24} md={16}>
                 <Card>
                     <Title level={2}>{novel?.title}</Title>
                     <Paragraph type="secondary">{novel?.description}</Paragraph>
                     <Paragraph><strong>{t('状态:')}</strong> <Tag color={novel?.status === 'Writing' ? 'green' : 'volcano'}>{novel?.status}</Tag></Paragraph>
 
-                    <Space style={{ marginBottom: '24px' }}>
+                    <Space style={{ marginBottom: '24px' }} wrap>
                         <Button type="primary" icon={<PlayCircleOutlined />} onClick={handleStart} disabled={novel?.status === 'Writing'}>{t('开始自动写作')}</Button>
                         <Button icon={<PauseCircleOutlined />} onClick={handlePause} disabled={novel?.status !== 'Writing'}>{t('暂停自动写作')}</Button>
                     </Space>
@@ -213,7 +213,7 @@ const EditorPage: React.FC = () => {
                   
                 </Card>
             </Col>
-            <Col span={8}>
+            <Col xs={24} md={8}>
                 <Card>
                     <Title level={3}>{t('对话历史')}</Title>
                     <div style={{ maxHeight: '60vh', overflowY: 'auto', marginBottom: '24px' }}>

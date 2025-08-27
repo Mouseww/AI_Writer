@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api.ts';
+import { Form, Input, Button, Card, message as antdMessage } from 'antd';
 
 interface UserSettings {
     aiProxyUrl: string;
@@ -9,71 +10,55 @@ interface UserSettings {
 
 const SettingsPage: React.FC = () => {
     const { t } = useTranslation();
-    const [settings, setSettings] = useState<UserSettings>({ aiProxyUrl: '', encryptedApiKey: '' });
-    const [message, setMessage] = useState('');
+    const [form] = Form.useForm();
 
     useEffect(() => {
         const fetchSettings = async () => {
             try {
                 const response = await api.get('/settings');
-                setSettings(response.data);
+                form.setFieldsValue(response.data);
             } catch (error) {
                 console.error('Failed to fetch settings', error);
-                setMessage(t('Could not load your settings.'));
+                antdMessage.error(t('Could not load your settings.'));
             }
         };
         fetchSettings();
-    }, [t]);
+    }, [t, form]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setSettings(prevSettings => ({
-            ...prevSettings,
-            [name]: value,
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setMessage('');
+    const handleSubmit = async (values: UserSettings) => {
         try {
-            await api.post('/settings', settings);
-            setMessage(t('Settings saved successfully!'));
+            await api.post('/settings', values);
+            antdMessage.success(t('Settings saved successfully!'));
         } catch (error) {
             console.error('Failed to save settings', error);
-            setMessage(t('Failed to save settings. Please try again.'));
+            antdMessage.error(t('Failed to save settings. Please try again.'));
         }
     };
 
     return (
-        <div>
-            <h2>{t('AI Settings')}</h2>
-            <p>{t('Configure your AI model provider here.')}</p>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="aiProxyUrl">{t('AI Proxy URL:')}</label>
-                    <input
-                        type="text"
-                        id="aiProxyUrl"
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: '50px' }}>
+            <Card title={t('AI Settings')} style={{ width: '100%', maxWidth: '600px' }}>
+                <p>{t('Configure your AI model provider here.')}</p>
+                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                    <Form.Item
+                        label={t('AI Proxy URL:')}
                         name="aiProxyUrl"
-                        value={settings.aiProxyUrl || ''}
-                        onChange={handleChange}
-                        placeholder={t('e.g., https://api.openai.com/v1')}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="encryptedApiKey">{t('API Key:')}</label>
-                    <input
-                        type="password"
-                        id="encryptedApiKey"
+                        rules={[{ required: true, message: t('Please input your AI Proxy URL!') }]}
+                    >
+                        <Input placeholder={t('e.g., https://api.openai.com/v1')} />
+                    </Form.Item>
+                    <Form.Item
+                        label={t('API Key:')}
                         name="encryptedApiKey"
-                        value={settings.encryptedApiKey || ''}
-                        onChange={handleChange}
-                    />
-                </div>
-                <button type="submit">{t('Save Settings')}</button>
-            </form>
-            {message && <p>{message}</p>}
+                        rules={[{ required: true, message: t('Please input your API Key!') }]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">{t('Save Settings')}</Button>
+                    </Form.Item>
+                </Form>
+            </Card>
         </div>
     );
 };

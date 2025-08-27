@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Novel } from '../types';
 import { useNavigate, Link } from 'react-router-dom';
-import { Table, Button, Typography, Tag, Space, Alert, Popconfirm, Spin, Skeleton } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
+import { Table, Button, Typography, Tag, Space, Alert, Popconfirm, Dropdown, Menu, Skeleton } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, PlayCircleOutlined, PauseCircleOutlined, MoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { CSSTransition } from 'react-transition-group';
 
 const { Title } = Typography;
 
@@ -14,21 +14,30 @@ const DashboardPage: React.FC = () => {
     const [novels, setNovels] = useState<Novel[]>([]);
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false); // For loading animation
+    const [loading, setLoading] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         fetchNovels();
     }, [t]);
 
     const fetchNovels = async () => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
             const response = await api.get('/novels');
             setNovels(response.data);
         } catch (err) {
             setError(t('Failed to fetch novels. You might need to log in.'));
         } finally {
-            setLoading(false); // End loading
+            setLoading(false);
         }
     };
 
@@ -44,13 +53,11 @@ const DashboardPage: React.FC = () => {
     const handleStartWriting = async (id: number) => {
         try {
             await api.post(`/novels/${id}/workflow/status`, { status: 'Writing' });
-            // 更新本地状态以立即反映变化
             setNovels(prevNovels => 
                 prevNovels.map(novel => 
                     novel.id === id ? { ...novel, status: 'Writing' } : novel
                 )
             );
-            // 重新获取所有小说信息以确保数据同步
             setTimeout(() => fetchNovels(), 500);
         } catch (err) {
             console.error('Failed to start writing:', err);
@@ -61,13 +68,11 @@ const DashboardPage: React.FC = () => {
     const handlePauseWriting = async (id: number) => {
         try {
             await api.post(`/novels/${id}/workflow/status`, { status: 'Paused' });
-            // 更新本地状态以立即反映变化
             setNovels(prevNovels => 
                 prevNovels.map(novel => 
                     novel.id === id ? { ...novel, status: 'Paused' } : novel
                 )
             );
-            // 重新获取所有小说信息以确保数据同步
             setTimeout(() => fetchNovels(), 500);
         } catch (err) {
             console.error('Failed to pause writing:', err);
@@ -114,40 +119,66 @@ const DashboardPage: React.FC = () => {
         {
             title: t('Actions'),
             key: 'actions',
-            render: (text: string, record: Novel) => (
-                <Space size="small">
-                    {record.status === 'Paused' || record.status === 'Draft' ? (
-                        <Button 
-                            icon={<PlayCircleOutlined />} 
-                            onClick={() => handleStartWriting(record.id)} 
-                            title={t('Start Writing')} 
-                            type="primary"
-                            ghost
-                        />
-                    ) : (
-                        <Button 
-                            icon={<PauseCircleOutlined />} 
-                            onClick={() => handlePauseWriting(record.id)} 
-                            title={t('Pause Writing')} 
-                            danger
-                            ghost
-                        />
-                    )}
-                    <Button icon={<EditOutlined />} onClick={() => navigate(`/novels/${record.id}/edit`)} title={t('Edit Novel')} />
-                    <Popconfirm
-                        title={t("Are you sure to delete this novel?")}
-                        onConfirm={() => handleDelete(record.id)}
-                        okText={t("Yes")}
-                        cancelText={t("No")}
-                    >
-                        <Button icon={<DeleteOutlined />} danger title={t('Delete Novel')} />
-                    </Popconfirm>
-                </Space>
-            ),
+            render: (text: string, record: Novel) => {
+                const menu = (
+                    <Menu>
+                        {record.status === 'Paused' || record.status === 'Draft' ? (
+                            <Menu.Item key="start" icon={<PlayCircleOutlined />} onClick={() => handleStartWriting(record.id)}>{t('Start Writing')}</Menu.Item>
+                        ) : (
+                            <Menu.Item key="pause" icon={<PauseCircleOutlined />} onClick={() => handlePauseWriting(record.id)}>{t('Pause Writing')}</Menu.Item>
+                        )}
+                        <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => navigate(`/novels/${record.id}/edit`)}>{t('Edit Novel')}</Menu.Item>
+                        <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                            <Popconfirm
+                                title={t("Are you sure to delete this novel?")}
+                                onConfirm={() => handleDelete(record.id)}
+                                okText={t("Yes")}
+                                cancelText={t("No")}
+                            >
+                                {t('Delete Novel')}
+                            </Popconfirm>
+                        </Menu.Item>
+                    </Menu>
+                );
+
+                return isMobile ? (
+                    <Dropdown overlay={menu} trigger={['click']}>
+                        <Button icon={<MoreOutlined />} />
+                    </Dropdown>
+                ) : (
+                    <Space size="small">
+                        {record.status === 'Paused' || record.status === 'Draft' ? (
+                            <Button 
+                                icon={<PlayCircleOutlined />} 
+                                onClick={() => handleStartWriting(record.id)} 
+                                title={t('Start Writing')} 
+                                type="primary"
+                                ghost
+                            />
+                        ) : (
+                            <Button 
+                                icon={<PauseCircleOutlined />} 
+                                onClick={() => handlePauseWriting(record.id)} 
+                                title={t('Pause Writing')} 
+                                danger
+                                ghost
+                            />
+                        )}
+                        <Button icon={<EditOutlined />} onClick={() => navigate(`/novels/${record.id}/edit`)} title={t('Edit Novel')} />
+                        <Popconfirm
+                            title={t("Are you sure to delete this novel?")}
+                            onConfirm={() => handleDelete(record.id)}
+                            okText={t("Yes")}
+                            cancelText={t("No")}
+                        >
+                            <Button icon={<DeleteOutlined />} danger title={t('Delete Novel')} />
+                        </Popconfirm>
+                    </Space>
+                );
+            },
         },
     ];
 
-    // 渲染内容根据加载状态决定
     const renderContent = () => {
         if (loading) {
             return (

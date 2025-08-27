@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout, Menu, Button, Dropdown, Space, Avatar } from 'antd';
-import { UserOutlined, SettingOutlined, LogoutOutlined, GlobalOutlined } from '@ant-design/icons';
+import { UserOutlined, SettingOutlined, LogoutOutlined, GlobalOutlined, MenuOutlined } from '@ant-design/icons';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -20,6 +20,15 @@ const AppContent: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState<{ username: string } | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -68,31 +77,32 @@ const AppContent: React.FC = () => {
     </Menu>
   );
 
+  const mainNavigationMenu = (
+    <Menu theme="dark" mode={isMobile ? "vertical" : "horizontal"} defaultSelectedKeys={['/']} selectedKeys={[window.location.pathname]} style={{ flex: 1, minWidth: 0 }}>
+      <Menu.Item key="/"><Link to="/">{t('Dashboard')}</Link></Menu.Item>
+      <Menu.Item key="/agents"><Link to="/agents">{t('AI Agents')}</Link></Menu.Item>
+    </Menu>
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
+      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '0 10px' : '0 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '20px', marginRight: '20px' }}>
-            {/* Placeholder for Logo */}
             <Link to="/" style={{ color: 'inherit' }}>{t('AIWriter')}</Link>
           </div>
-          {user && (
-            <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['/']} selectedKeys={[window.location.pathname]} style={{ flex: 1, minWidth: 0 }}>
-              <Menu.Item key="/"><Link to="/">{t('Dashboard')}</Link></Menu.Item>
-              <Menu.Item key="/agents"><Link to="/agents">{t('AI Agents')}</Link></Menu.Item>
-            </Menu>
-          )}
+          {!isMobile && user && mainNavigationMenu}
         </div>
         <div style={{ display: 'flex', alignItems: 'center'}}>
           <Dropdown overlay={langMenu} trigger={['click']}>
-            <Button icon={<GlobalOutlined />} shape="circle" style={{ marginRight: '20px',marginTop: '16px'  }} />
+            <Button icon={<GlobalOutlined />} shape="circle" style={{ marginRight: '10px'}} />
           </Dropdown>
           {user ? (
             <Dropdown overlay={userMenu} trigger={['click']}>
               <a onClick={e => e.preventDefault()}>
                 <Space>
                   <Avatar icon={<UserOutlined />} />
-                  {user.username}
+                  {!isMobile && user.username}
                 </Space>
               </a>
             </Dropdown>
@@ -102,10 +112,15 @@ const AppContent: React.FC = () => {
               <Button onClick={() => navigate('/register')}>{t('Register')}</Button>
             </Space>
           )}
+          {isMobile && user && (
+            <Dropdown overlay={mainNavigationMenu} trigger={['click']}>
+              <Button icon={<MenuOutlined />} style={{ marginLeft: '10px' }} />
+            </Dropdown>
+          )}
         </div>
       </Header>
-      <Content className="app-content" style={{ padding: '0 50px', marginTop: '24px' }}>
-        <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+      <Content className="app-content" style={{ padding: isMobile ? '0 10px' : '0 50px', marginTop: '24px' }}>
+        <div style={{ background: '#fff', padding: isMobile ? 12 : 24, minHeight: 280 }}>
           <Routes>
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
             <Route path="/register" element={<RegisterPage />} />
