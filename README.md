@@ -368,3 +368,5 @@ AIWriter 项目可以使用 Docker 和 Docker Compose 进行部署，为本地�
 
 ---
 **注意：** 本手册假定您对 Docker 和 Docker Compose 有基本了解。有关更高级的配置或故障排除，请参阅官方 Docker 文档和项目源代码。
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Mouseww/AI_Writer&type=Date)](https://star-history.com/#Mouseww/AI_Writer&Date)
