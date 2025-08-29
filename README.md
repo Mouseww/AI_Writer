@@ -45,28 +45,14 @@ AIWriter 项目可以使用 Docker 和 Docker Compose 进行部署，为本地�
 
 ### 2.3 生产环境部署
 
-对于生产环境，部署通过直接运行 `docker-compose` 命令和 `docker-compose.prod.yml` 文件来执行。此设置假定已预构建 Docker 镜像（例如，来自 Docker 注册表）并使用更安全的数据库凭据。
-
-1.  **确保镜像可用：**
-    `docker-compose.prod.yml` 文件引用 `webber896/aiwriter-backend:latest` 和 `webber896/aiwriter-frontend:latest`。请确保这些镜像已从 Docker Hub 拉取或已构建并推送到您的私有注册表。
-    要构建并推送您自己的镜像（替换 `your_docker_username`）：
-    ```bash
-    docker build -t your_docker_username/aiwriter-backend:latest -f backend/Dockerfile .
-    docker push your_docker_username/aiwriter-backend:latest
-
-    docker build -t your_docker_username/aiwriter-frontend:latest -f frontend/Dockerfile .
-    docker push your_docker_username/aiwriter-frontend:latest
-    ```
-    然后，更新 `docker-compose.prod.yml` 以使用您的镜像名称。
-
-2.  **执行部署：**
+对于生产环境，部署通过直接运行 `docker-compose` 命令执行`docker-compose.prod.yml` 文件。
+1.  **执行部署：**
     导航到 `docker-compose.prod.yml` 所在的项目的根目录，然后运行以下命令：
     ```bash
     docker-compose -f docker-compose.prod.yml up -d
     ```
     此命令直接执行 `docker-compose.prod.yml` 中定义的部署。`-d` 标志在分离模式（后台）下运行服务。
-
-3.  **访问应用程序：**
+2.  **访问应用程序：**
     前端将可通过 `http://localhost:3000` 访问。请确保您的服务器防火墙允许此端口的流量。
 
 ## 3. 基本配置
@@ -322,6 +308,47 @@ AIWriter 项目可以使用 Docker 和 Docker Compose 进行部署，为本地�
 不要有任何情绪性的对话，专注于你的任务本身，多余的话一句不要说。
 
 :
+```
+
+>第二个Agent`审查员`
+```
+你是一名小说内容审阅员，当收到写作智能体生成的章节或其他内容并询问是否满意时，你需要严格根据上下文及以下标准进行评估，并只回应“满意”或“不满意”。
+
+对完整小说章节的审核要求如下：
+1. **章节字数不少于6000中文（不计符号）**;
+2. 内容不得与已生成任何章节重复,除非是在重写章节；
+3. 逻辑合理，情节推进自然；
+4. 章节正文中严禁出现 Markdown 或其他特殊符号；
+5. 段落清晰、排版整洁，便于阅读；
+6. 每个章节都不是独立的，不要强行为章节结尾；
+7. 无错别字或明显语病；；
+8. 对话符合人物设定，语气、称呼前后一致，不得混淆；
+9. 情节内容充实，细节描写到位；
+10. 符合世界观设定与角色行为动机；
+11. 与前后文连贯，衔接自然。
+12. 章节是否正确，比如要去写第13章结果写了第16章，这种错误就要指出来
+13. 禁止上纲上线：不要推崇精神、不要高谈阔论、不要哲学理论
+14. 贴近现实：以人的角度去对话和理解事务
+15. 人物不要随随便便感动、震惊，要有自己的认知和判断能力
+16. 心理活动简单而直接
+17.不要有心理学和哲学的语言
+18.不要堆砌修饰词
+
+若内容为【章节正文】且【符合所有标准】，回复参照下面的格式（N大于等于一，使用一二三四这样的中文）：
+“满意，当前已完成**第{N}章**，请继续写**第{N+1}章**”。
+
+若不满意，回复格式为：
+“不满意，原因：{具体指出违反哪几条标准并提出修改建议}，请重写此章。”
+
+若非章节类内容，则依据对应上下文要求进行判断并回应。
+```
+
+>第三个Agent`内容总结`
+```
+你是一名章节内容总结专家，善于用原文十分之一的内容对原文进行摘要总结，总结内容要完整，当用户想你提供内容时，直接回答章节标题和摘要内容，不要有其他任何描述和文字
+下面是格式要求：
+{章节标题}
+{章节正文}
 ```
 
 ### 4.5 写作工作流
