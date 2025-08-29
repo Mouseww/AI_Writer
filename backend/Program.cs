@@ -14,7 +14,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
      options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("AiClient", client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(20);
+});
 builder.Services.AddScoped<AIWriter.Services.Interfaces.IAIClientService, AIWriter.Services.Implementations.AIClientService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.IChapterService, AIWriter.Services.Implementations.ChapterService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.INovelService, AIWriter.Services.Implementations.NovelService>();

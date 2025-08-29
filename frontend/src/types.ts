@@ -6,6 +6,7 @@ export interface Novel {
     createdAt: string;
     totalWordCount: number;
     latestChapterTitle?: string; // Optional, as a novel might not have chapters yet
+    chapters?: Chapter[] ;
 }
 
 export interface Chapter {

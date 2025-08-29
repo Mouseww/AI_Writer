@@ -51,6 +51,7 @@ namespace AIWriter.Controllers
         }
 
         // POST: api/novels
+        [HttpPost]
         public async Task<ActionResult<NovelVo>> CreateNovel([FromBody] NovelCreateDto novelDto)
         {
             if (!ModelState.IsValid)
@@ -65,6 +66,7 @@ namespace AIWriter.Controllers
         }
 
         // PUT: api/novels/5
+        [HttpPut("{id}")]
         public async Task<ActionResult<NovelVo>> UpdateNovel(int id, [FromBody] NovelUpdateDto novelDto)
         {
             if (!ModelState.IsValid)
@@ -84,6 +86,7 @@ namespace AIWriter.Controllers
         }
 
         // DELETE: api/novels/5
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNovel(int id)
         {
             var userId = GetUserId();
