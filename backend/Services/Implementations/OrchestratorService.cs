@@ -47,7 +47,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var aiClient = scope.ServiceProvider.GetRequiredService<AIClientService>();
+                    var aiClient = scope.ServiceProvider.GetRequiredService<IAIClientService>();
 
                     var novel = await dbContext.Novels.FindAsync(novelId);
                     if (novel == null || novel.Status != "Writing")

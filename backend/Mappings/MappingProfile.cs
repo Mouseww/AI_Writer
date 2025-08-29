@@ -22,6 +22,7 @@ namespace AIWriter.Mappings
             CreateMap<Chapter, ChapterVo>();
             CreateMap<Agent, AgentVo>();
             CreateMap<UserSetting, UserSettingVo>();
+            CreateMap<ConversationHistory, ConversationHistoryVo>();
         }
     }
 }

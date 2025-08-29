@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using AIWriter.Vos;
+using System.Text.RegularExpressions;
 
 namespace AIWriter.Services.Implementations
 {
@@ -131,17 +132,31 @@ namespace AIWriter.Services.Implementations
                 return false;
             }
 
-            var abstracter = await _context.Agents.FirstOrDefaultAsync(a => a.UserId == userId && a.Order == 2);
+            var abstracter = await _context.Agents.Where(a => a.UserId == userId).OrderBy(x => x.Order).LastOrDefaultAsync();
 
             if (abstracter == null)
             {
                 return false;
             }
 
-            var messages = new List<Message>
+            // Extract title and content from writerOutput
+            var titleRegex = new Regex(@"(?:\*\*)?\s*(第[一二三四五六七八九十百千万〇零\d]+章\s+[^\r\n]+)", RegexOptions.Multiline);
+            var match = titleRegex.Match(historyItem.Content);
+
+            string title="";
+            string content="";
+
+            if (match.Success && match.Groups.Count > 1)
+            {
+                title = match.Groups[1].Value.Split('(')[0].Replace("*", "");
+                content = historyItem.Content.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
+                var contentArray = content.Split("---");
+                content = contentArray[contentArray.Length - 1];
+            }
+                var messages = new List<Message>
             {
                 new Message { Role = "system", Content = abstracter.Prompt },
-                new Message { Role = "user", Content = $"标题：\r\n{novel.Title}\r\n\r\n正文：\r\n{historyItem.Content}" }
+                new Message { Role = "user", Content = $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}" }
             };
 
             var newAbstract = await _aiClientService.GenerateText(abstracter.Model, messages);

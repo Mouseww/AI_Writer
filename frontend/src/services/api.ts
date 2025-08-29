@@ -38,4 +38,12 @@ export const deleteChapter = (novelId: number, chapterId: number) => {
   return api.delete(`/novels/${novelId}/chapters/${chapterId}`);
 };
 
+export const getNovel = (id: number) => {
+  return api.get(`/novels/${id}`);
+};
+
+export const updateNovel = (id: number, data: any) => {
+  return api.put(`/novels/${id}`, data);
+};
+
 export default api;

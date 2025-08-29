@@ -16,7 +16,7 @@ const EditNovelPage: React.FC = () => {
     useEffect(() => {
         const fetchNovel = async () => {
             try {
-                const response = await api.get<Novel>(`/novels/${id}`);
+                const response = await api.getNovel<Novel>(parseInt(id!));
                 form.setFieldsValue(response.data);
             } catch (err) {
                 antdMessage.error(t('Failed to load novel data.'));
@@ -27,7 +27,7 @@ const EditNovelPage: React.FC = () => {
 
     const handleSubmit = async (values: { title: string, description: string }) => {
         try {
-            await api.put(`/novels/${id}`, { id: parseInt(id!, 10), ...values });
+            await api.updateNovel(parseInt(id!, 10), { id: parseInt(id!, 10), ...values });
             antdMessage.success(t('Novel updated successfully!'));
             navigate('/'); // Redirect to dashboard on success
         } catch (err) {

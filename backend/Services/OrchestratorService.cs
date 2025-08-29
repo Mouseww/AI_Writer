@@ -1,6 +1,8 @@
 ﻿using AIWriter.Data;
 using AIWriter.Dtos;
 using AIWriter.Models;
+using AIWriter.Services.Implementations;
+using AIWriter.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -46,7 +48,7 @@ namespace AIWriter.Services
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    var aiClient = scope.ServiceProvider.GetRequiredService<AIClientService>();
+                    var aiClient = scope.ServiceProvider.GetRequiredService<IAIClientService>();
 
                     var novel = await dbContext.Novels.FindAsync(novelId);
                     if (novel == null || novel.Status != "Writing")
@@ -89,7 +91,7 @@ namespace AIWriter.Services
                             });
                         }
 
-                        var writerMessages = BuildMessages(novel, writer.Prompt, history);
+                        var writerMessages = BuildMessages(novel, writer, history);
                         var writerOutput = await aiClient.GenerateText(writer.Model, writerMessages);
                         history.Insert(0, new ConversationHistory
                         {
@@ -103,7 +105,7 @@ namespace AIWriter.Services
 
 
                         // 2. Optimizer Agent
-                        var optimizerMessages = BuildMessages(novel, optimizer.Prompt, history);
+                        var optimizerMessages = BuildMessages(novel, optimizer, history);
                         var optimizerOutput = await aiClient.GenerateText(optimizer.Model, optimizerMessages);
 
                         history.Insert(0, new ConversationHistory
@@ -216,11 +218,11 @@ namespace AIWriter.Services
             return chineseCount + otherCount;
         }
 
-        private List<Message> BuildMessages(Novel novel, string systemPrompt, List<ConversationHistory> histories)
+        private List<Message> BuildMessages(Novel novel, Agent agent, List<ConversationHistory> histories)
         {
             var messages = new List<Message>
             {
-                new Message { Role = "system", Content = systemPrompt }
+                new Message { Role = "system", Content = agent.Prompt }
             };
 
             messages.Add(new Message { Role = "user", Content = $"Novel Title: {novel.Title}\n\nNovel Description: {novel.Description}\n\n" });
@@ -228,14 +230,14 @@ namespace AIWriter.Services
             if (histories.Any())
             {
                 var tempHistories = histories.OrderBy(x => x.Timestamp).ToList();
-                foreach (var history in tempHistories.Take(tempHistories.Count-4))
+                foreach (var history in tempHistories.Take(tempHistories.Count - 4))
                 {
-                    messages.Add(new Message { Role = history.Id== "assistant", Content = history.Abstract });
+                    messages.Add(new Message { Role = agent.Id == history.AgentId ? "assistant" : "user", Content = history.Abstract });
                 }
 
-                foreach (var history in tempHistories.Skip(tempHistories.Count-4))
+                foreach (var history in tempHistories.Skip(tempHistories.Count - 4))
                 {
-                    messages.Add(new Message { Role = "assistant", Content = history.Content });
+                    messages.Add(new Message { Role = agent.Id == history.AgentId ? "assistant" : "user", Content = history.Content });
                 }
             }
 

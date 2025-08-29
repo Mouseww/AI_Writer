@@ -31,6 +31,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                 var userSettings = await dbContext.UserSettings.FirstOrDefaultAsync();
 
                 var client = _httpClientFactory.CreateClient();
+                client.Timeout = TimeSpan.FromMinutes(20);
                 var requestUrl = userSettings?.AiProxyUrl + "/chat/completions";
 
                 var requestBody = new
