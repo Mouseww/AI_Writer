@@ -30,7 +30,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                 // Assuming a single user for now, or you need to pass userId
                 var userSettings = await dbContext.UserSettings.FirstOrDefaultAsync();
 
-                var client = _httpClientFactory.CreateClient();
+                var client = _httpClientFactory.CreateClient("AiClient");
                 client.Timeout = TimeSpan.FromMinutes(20);
                 var requestUrl = userSettings?.AiProxyUrl + "/chat/completions";
 
