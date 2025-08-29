@@ -5,6 +5,11 @@
 ## 1. 简介
 
 AIWriter 是一个基于 Web 的应用程序，旨在帮助用户撰写小说。它由一个基于 React 的前端、一个 .NET 后端 API 和一个 MySQL 数据库组成。该应用程序利用 AI 模型完成各种写作任务。
+<img width="1810" height="621" alt="image" src="https://github.com/user-attachments/assets/8295d2ba-7802-4a45-be43-45543a0d7ba8" />
+<img width="1909" height="957" alt="image" src="https://github.com/user-attachments/assets/deedba8b-2ace-4ed7-927d-1744606ef379" />
+<img width="1753" height="858" alt="image" src="https://github.com/user-attachments/assets/b5c156f0-54fb-4261-aafd-ce1e6aefb296" />
+
+
 
 ## 2. 部署
 
@@ -363,3 +368,5 @@ AIWriter 项目可以使用 Docker 和 Docker Compose 进行部署，为本地�
 
 ---
 **注意：** 本手册假定您对 Docker 和 Docker Compose 有基本了解。有关更高级的配置或故障排除，请参阅官方 Docker 文档和项目源代码。
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Mouseww/AI_Writer&type=Date)](https://star-history.com/#Mouseww/AI_Writer&Date)
