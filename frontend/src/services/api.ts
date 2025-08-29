@@ -26,6 +26,10 @@ export const getChapters = (novelId: number) => {
   return api.get(`/novels/${novelId}/chapters`);
 };
 
+export const getChapter = (novelId: number, chapterId: number) => {
+  return api.get(`/novels/${novelId}/chapters/${chapterId}`);
+};
+
 export const updateChapter = (novelId: number, chapterId: number, title: string, content: string) => {
   return api.put(`/novels/${novelId}/chapters/${chapterId}`, { title, content });
 };
