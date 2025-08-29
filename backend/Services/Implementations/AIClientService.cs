@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using AIWriter.Services.Interfaces; // Added using directive
 
-namespace AIWriter.Services
+namespace AIWriter.Services.Implementations // Updated namespace
 {
-    public class AIClientService
+    public class AIClientService : IAIClientService // Updated class definition
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IServiceScopeFactory _scopeFactory;
@@ -46,7 +47,7 @@ namespace AIWriter.Services
 
                 if (string.IsNullOrEmpty(userSettings?.AiProxyUrl) || string.IsNullOrEmpty(userSettings.EncryptedApiKey))
                 {
-                    return $"[ERROR: AI settings not configured. Please configure API Key and URL in Settings.]";
+                    return "[ERROR: AI settings not configured. Please configure API Key and URL in Settings.]";
                 }
 
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", userSettings.EncryptedApiKey);

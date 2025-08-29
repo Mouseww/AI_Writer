@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import api from '../services/api';
+import { getChapter } from '../services/api';
 import { Chapter } from '../types';
 import { toLocalTime } from '../utils/time';
 import { Spin } from 'antd';
@@ -17,7 +17,7 @@ const ChapterDetailPage: React.FC = () => {
             if (novelId && chapterId) {
                 setLoading(true);
                 try {
-                    const response = await api.get(`/novels/${novelId}/chapters/${chapterId}`);
+                    const response = await getChapter(parseInt(novelId), parseInt(chapterId));
                     setChapter(response.data);
                 } catch (error) {
                     console.error(t("Failed to fetch chapter"), error);

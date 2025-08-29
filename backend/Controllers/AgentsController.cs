@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AIWriter.Services.Interfaces;
+using AIWriter.Services.Implementations;
+using AIWriter.Vos;
 
 namespace AIWriter.Controllers
 {
@@ -13,19 +16,19 @@ namespace AIWriter.Controllers
     [Route("api/agents")]
     public class AgentsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IAgentService _agentService;
 
-        public AgentsController(ApplicationDbContext context)
+        public AgentsController(AIWriter.Services.Interfaces.IAgentService agentService)
         {
-            _context = context;
+            _agentService = agentService;
         }
 
         // GET: api/agents
         [HttpGet]
-        public async Task<IActionResult> GetAgents()
+        public async Task<ActionResult<IEnumerable<AgentVo>>> GetAgents()
         {
             var userId = GetUserId();
-            var agents = await _context.Agents.Where(a => a.UserId == userId).OrderBy(a => a.Order).ToListAsync();
+            var agents = await _agentService.GetAgentsAsync(userId);
             return Ok(agents);
         }
 
@@ -34,51 +37,32 @@ namespace AIWriter.Controllers
         public async Task<IActionResult> GetModels()
         {
             var userId = GetUserId();
-            var userSettings = await _context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
-            if (userSettings == null || string.IsNullOrEmpty(userSettings.AiProxyUrl) || string.IsNullOrEmpty(userSettings.EncryptedApiKey))
+            var modelsJson = await _agentService.GetModelsAsync(userId);
+
+            if (modelsJson.Contains("error")) // Check for error message from service
             {
-                return BadRequest("AI settings not configured.");
+                return BadRequest(modelsJson);
             }
 
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", userSettings.EncryptedApiKey);
-            var response = await client.GetAsync($"{userSettings.AiProxyUrl}/models");
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode((int)response.StatusCode, "Failed to fetch models from proxy.");
-            }
-
-            var content = await response.Content.ReadAsStringAsync();
-            return Content(content, "application/json");
+            return Content(modelsJson, "application/json");
         }
 
         // POST: api/agents
         [HttpPost]
-        public async Task<IActionResult> CreateAgent([FromBody] AgentCreateDto agentDto)
+        public async Task<ActionResult<AgentVo>> CreateAgent([FromBody] AgentCreateDto agentDto)
         {
             var userId = GetUserId();
-            var agent = new Agent
-            {
-                UserId = userId,
-                Name = agentDto.Name,
-                Prompt = agentDto.Prompt,
-                Model = agentDto.Model,
-                Order = agentDto.Order
-            };
-
-            _context.Agents.Add(agent);
-            await _context.SaveChangesAsync();
+            var agent = await _agentService.CreateAgentAsync(agentDto, userId);
 
             return CreatedAtAction(nameof(GetAgent), new { id = agent.Id }, agent);
         }
         
         // GET: api/agents/1
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAgent(int id)
+        public async Task<ActionResult<AgentVo>> GetAgent(int id)
         {
             var userId = GetUserId();
-            var agent = await _context.Agents.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+            var agent = await _agentService.GetAgentByIdAsync(id, userId);
             if (agent == null) return NotFound();
             return Ok(agent);
         }
@@ -86,22 +70,16 @@ namespace AIWriter.Controllers
 
         // PUT: api/agents/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAgent(int id, [FromBody] AgentUpdateDto agentDto)
+        public async Task<ActionResult<AgentVo>> UpdateAgent(int id, [FromBody] AgentUpdateDto agentDto)
         {
             var userId = GetUserId();
-            var agent = await _context.Agents.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-            if (agent == null)
+            var updatedAgent = await _agentService.UpdateAgentAsync(id, agentDto, userId);
+            if (updatedAgent == null)
             {
                 return NotFound();
             }
 
-            agent.Name = agentDto.Name;
-            agent.Prompt = agentDto.Prompt;
-            agent.Model = agentDto.Model;
-            agent.Order = agentDto.Order;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(updatedAgent);
         }
 
         // DELETE: api/agents/1
@@ -109,14 +87,7 @@ namespace AIWriter.Controllers
         public async Task<IActionResult> DeleteAgent(int id)
         {
             var userId = GetUserId();
-            var agent = await _context.Agents.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
-            if (agent == null)
-            {
-                return NotFound();
-            }
-
-            _context.Agents.Remove(agent);
-            await _context.SaveChangesAsync();
+            await _agentService.DeleteAgentAsync(id, userId);
             return NoContent();
         }
 

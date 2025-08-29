@@ -1,5 +1,6 @@
 using AIWriter.Data;
-using AIWriter.Services;
+using AIWriter.Services.Interfaces;
+using AIWriter.Services.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,9 @@ namespace AIWriter.Controllers
     public class WorkflowController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly OrchestratorService _orchestrator;
+        private readonly IOrchestratorService _orchestrator;
 
-        public WorkflowController(ApplicationDbContext context, OrchestratorService orchestrator)
+        public WorkflowController(ApplicationDbContext context, AIWriter.Services.Interfaces.IOrchestratorService orchestrator)
         {
             _context = context;
             _orchestrator = orchestrator;

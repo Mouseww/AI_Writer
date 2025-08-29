@@ -1,4 +1,4 @@
-﻿using AIWriter.Data;
+using AIWriter.Data;
 using AIWriter.Dtos;
 using AIWriter.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AIWriter.Services.Interfaces; // Added using directive
 
-namespace AIWriter.Services
+namespace AIWriter.Services.Implementations // Updated namespace
 {
-    public class OrchestratorService
+    public class OrchestratorService : IOrchestratorService // Updated class definition
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<int, CancellationTokenSource> _runningTasks = new Dictionary<int, CancellationTokenSource>();
@@ -138,7 +139,7 @@ namespace AIWriter.Services
 
                         if (passed && match.Success && match.Groups.Count > 1)
                         {
-                            title = match.Groups[1].Value.Split("(")[0].Replace("*", "");
+                            title = match.Groups[1].Value.Split('(')[0].Replace("*", "");
                             content = writerOutput.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
                             var contentArray = content.Split("---");
                             content = contentArray[contentArray.Length - 1];
@@ -212,10 +213,10 @@ namespace AIWriter.Services
             }
 
             // Count Chinese characters
-            int chineseCount = Regex.Matches(text, @"[\u4e00-\u9fa5]").Count;
+            int chineseCount = Regex.Matches(text, "[\u4e00-\u9fa5]").Count;
 
             // Count English words and numbers
-            int otherCount = Regex.Matches(text, @"[a-zA-Z0-9]+").Count;
+            int otherCount = Regex.Matches(text, "[a-zA-Z0-9]+").Count;
 
             return chineseCount + otherCount;
         }

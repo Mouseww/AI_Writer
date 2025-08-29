@@ -1,63 +1,60 @@
-using AIWriter.Data;
+
 using AIWriter.Dtos;
-using AIWriter.Models;
+using AIWriter.Services.Interfaces;
+using AIWriter.Services.Implementations;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using AIWriter.Vos;
 
 namespace AIWriter.Controllers
 {
+    /// <summary>
+    /// API controller for managing user settings.
+    /// </summary>
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SettingsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ISettingsService _settingsService;
+        private readonly IMapper _mapper;
 
-        public SettingsController(ApplicationDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SettingsController"/> class.
+        /// </summary>
+        /// <param name="settingsService">The settings service.</param>
+        /// <param name="mapper">The AutoMapper instance.</param>
+        public SettingsController(ISettingsService settingsService, IMapper mapper)
         {
-            _context = context;
+            _settingsService = settingsService;
+            _mapper = mapper;
         }
 
-        // GET: api/settings
+        /// <summary>
+        /// Gets the user settings.
+        /// </summary>
+        /// <returns>The user settings.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetSettings()
+        public async Task<ActionResult<UserSettingVo>> GetSettings()
         {
             var userId = GetUserId();
-            var settings = await _context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
-
-            if (settings == null)
-            {
-                // If no settings exist, create a default one
-                settings = new UserSetting { UserId = userId };
-                _context.UserSettings.Add(settings);
-                await _context.SaveChangesAsync();
-            }
-
+            var settings = await _settingsService.GetSettingsAsync(userId);
             return Ok(settings);
         }
 
-        // POST: api/settings
+        /// <summary>
+        /// Updates the user settings.
+        /// </summary>
+        /// <param name="settingsDto">The settings to update.</param>
+        /// <returns>The updated user settings.</returns>
         [HttpPost]
-        public async Task<IActionResult> UpdateSettings([FromBody] SettingsUpdateDto settingsDto)
+        public async Task<ActionResult<UserSettingVo>> UpdateSettings([FromBody] SettingsUpdateDto settingsDto)
         {
             var userId = GetUserId();
-            var settings = await _context.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId);
-
-            if (settings == null)
-            {
-                // Create new settings if they don't exist
-                settings = new UserSetting { UserId = userId };
-                _context.UserSettings.Add(settings);
-            }
-
-            settings.AiProxyUrl = settingsDto.AiProxyUrl;
-            // In a real app, you MUST encrypt the API key before saving.
-            settings.EncryptedApiKey = settingsDto.EncryptedApiKey; 
-
-            await _context.SaveChangesAsync();
-
+            var settings = await _settingsService.UpdateSettingsAsync(userId, settingsDto);
             return Ok(settings);
         }
 
@@ -67,3 +64,4 @@ namespace AIWriter.Controllers
         }
     }
 }
+

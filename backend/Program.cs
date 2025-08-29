@@ -1,5 +1,6 @@
 using AIWriter.Data;
 using AIWriter.Services;
+using AIWriter.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,8 +15,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
      options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<AIClientService>();
-builder.Services.AddSingleton<OrchestratorService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.IAIClientService, AIWriter.Services.Implementations.AIClientService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.IChapterService, AIWriter.Services.Implementations.ChapterService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.INovelService, AIWriter.Services.Implementations.NovelService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.IAgentService, AIWriter.Services.Implementations.AgentService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.ISettingsService, AIWriter.Services.Implementations.SettingsService>();
+builder.Services.AddSingleton<AIWriter.Services.Interfaces.IOrchestratorService, AIWriter.Services.Implementations.OrchestratorService>();
+
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
