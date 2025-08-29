@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { Button, Input, Typography, Space, Popconfirm, message, Switch } from 'antd';
-import { EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined, BookOutlined, RedoOutlined } from '@ant-design/icons';
+import { Button, Input, Typography, Space, Popconfirm, message, Switch, Dropdown, Menu } from 'antd';
+import { EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined, BookOutlined, RedoOutlined, MoreOutlined } from '@ant-design/icons';
 import { toLocalTime } from '../utils/time';
 
 const { Text, Paragraph } = Typography;
@@ -30,6 +30,15 @@ const HistoryItemView: React.FC<HistoryItemViewProps> = ({ item, novelId, onUpda
     const [isEditing, setIsEditing] = useState(false);
     const [content, setContent] = useState(item.content);
     const [showAbstract, setShowAbstract] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleSave = async () => {
         try {
@@ -65,23 +74,42 @@ const HistoryItemView: React.FC<HistoryItemViewProps> = ({ item, novelId, onUpda
         }
     };
 
+    const menu = (
+        <Menu>
+            <Menu.Item key="regenerate" icon={<RedoOutlined />} onClick={handleRegenerateAbstract}>{t('重新生成摘要')}</Menu.Item>
+            <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => setIsEditing(true)}>{t('修改')}</Menu.Item>
+            <Menu.Item key="saveAsChapter" icon={<BookOutlined />} onClick={() => onSaveAsChapter(item.content)}>{t('保存至章节')}</Menu.Item>
+            <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                <Popconfirm title={t("您确定要删除此项吗？")} onConfirm={handleDelete} okText={t("Yes")} cancelText={t("No")}>
+                    {t('删除')}
+                </Popconfirm>
+            </Menu.Item>
+        </Menu>
+    );
+
     return (
         <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text strong>{item.isUserMessage ? t('您') : item.agentName}</Text>
                 <Space>
                     {!item.isUserMessage && (
-                        <>
-                            <Switch
-                                checkedChildren={t("摘要")}
-                                unCheckedChildren={t("全文")}
-                                checked={showAbstract}
-                                onChange={setShowAbstract}
-                            />
-                            <Button icon={<RedoOutlined />} onClick={handleRegenerateAbstract} size="small" title={t('重新生成摘要')} />
-                            <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)} size="small" title={t('修改')} />
-                            <Button icon={<BookOutlined />} onClick={() => onSaveAsChapter(item.content)} size="small" title={t('保存至章节')} />
-                        </>
+                        isMobile ? (
+                            <Dropdown overlay={menu} trigger={['click']}>
+                                <Button icon={<MoreOutlined />} size="small" />
+                            </Dropdown>
+                        ) : (
+                            <>
+                                <Switch
+                                    checkedChildren={t("摘要")}
+                                    unCheckedChildren={t("全文")}
+                                    checked={showAbstract}
+                                    onChange={setShowAbstract}
+                                />
+                                <Button icon={<RedoOutlined />} onClick={handleRegenerateAbstract} size="small" title={t('重新生成摘要')} />
+                                <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)} size="small" title={t('修改')} />
+                                <Button icon={<BookOutlined />} onClick={() => onSaveAsChapter(item.content)} size="small" title={t('保存至章节')} />
+                            </>
+                        )
                     )}
                     <Popconfirm title={t("您确定要删除此项吗？")} onConfirm={handleDelete} okText={t("Yes")} cancelText={t("No")}>
                         <Button title={t('删除')} icon={<DeleteOutlined />} size="small" danger />

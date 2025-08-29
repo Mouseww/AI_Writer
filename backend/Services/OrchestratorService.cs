@@ -125,9 +125,9 @@ namespace AIWriter.Services
 
 
                         // Extract title and content from writerOutput
-                        var titleRegex = new Regex(@"(第[一二三四五六七八九十百千万]+章\s*[^*]+)");
-
+                        var titleRegex = new Regex(@"(?:\*\*)?\s*(第[一二三四五六七八九十百千万〇零\d]+章\s+[^\r\n]+)", RegexOptions.Multiline);
                         var match = titleRegex.Match(writerOutput);
+
                         if (!match.Success || match.Groups.Count < 1)
                         {
                             match = titleRegex.Match(optimizerOutput);
@@ -138,9 +138,12 @@ namespace AIWriter.Services
 
                         if (passed && match.Success && match.Groups.Count > 1)
                         {
-                            title = match.Groups[1].Value;
+                            title = match.Groups[1].Value.Split("(")[0].Replace("*", "");
                             content = writerOutput.Split(new[] { match.Value }, StringSplitOptions.None)[1].Trim();
-                            content = content.Split("---")[0];
+                            var contentArray = content.Split("---");
+                            content = contentArray[contentArray.Length - 1];
+
+
                             if (content.Length < 3000)
                             {
                                 history[0].Content += "字数不足";

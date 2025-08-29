@@ -86,36 +86,39 @@ const AppContent: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '0 10px' : '0 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '64px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1, height: '100%', padding: isMobile ? '0 10px' : '0 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', color: 'white', fontSize: '20px', marginRight: '20px' }}>
             <Link to="/" style={{ color: 'inherit' }}>{t('AIWriter')}</Link>
           </div>
           {!isMobile && user && mainNavigationMenu}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center'}}>
-          <Dropdown overlay={langMenu} trigger={['click']}>
-            <Button icon={<GlobalOutlined />} shape="circle" style={{ marginRight: '10px'}} />
-          </Dropdown>
+        <div style={{ display: 'flex', alignItems: 'center', height: '100%', padding: isMobile ? '15px 10px 15px 0px' : '16px 20px 15px 0px' }}>
+          <Space align="center">
+            <Dropdown overlay={langMenu} trigger={['click']}>
+              <Button icon={<GlobalOutlined />} shape="circle" />
+            </Dropdown>
+          </Space>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          {isMobile && user && (
+            <Dropdown overlay={mainNavigationMenu} trigger={['click']}>
+              <Button icon={<MenuOutlined />} style={{ marginLeft: '10px' }} />
+            </Dropdown>
+          )}
           {user ? (
             <Dropdown overlay={userMenu} trigger={['click']}>
               <a onClick={e => e.preventDefault()}>
-                <Space>
+                <Space align="center">
                   <Avatar icon={<UserOutlined />} />
                   {!isMobile && user.username}
                 </Space>
               </a>
             </Dropdown>
           ) : (
-            <Space>
+            <Space align="center">
               <Button type="primary" onClick={() => navigate('/login')}>{t('Login')}</Button>
               <Button onClick={() => navigate('/register')}>{t('Register')}</Button>
             </Space>
-          )}
-          {isMobile && user && (
-            <Dropdown overlay={mainNavigationMenu} trigger={['click']}>
-              <Button icon={<MenuOutlined />} style={{ marginLeft: '10px' }} />
-            </Dropdown>
           )}
         </div>
       </Header>

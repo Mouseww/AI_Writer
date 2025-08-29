@@ -30,24 +30,30 @@ const EditorPage: React.FC = () => {
     const [error, setError] = useState('');
     const [form] = Form.useForm();
     const [refreshChapterList, setRefreshChapterList] = useState(0);
+    const [loadingChapters, setLoadingChapters] = useState(false);
     const navigate = useNavigate();
 
     const novelId = parseInt(id!);
 
     const fetchNovelAndHistory = useCallback(async () => {
         if (!novelId) return;
+        setLoadingChapters(true);
         try {
             const response = await api.get(`/novels/${novelId}`);
             setNovel(response.data);
             setHistory(response.data.conversationHistories.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) || []);
+    
         } catch (err) {
             console.error('Failed to fetch novel and history', err);
             setError(t('Failed to load novel data.'));
+        } finally {
+            setLoadingChapters(false);
         }
     }, [novelId, t]);
 
     const fetchChapter = useCallback(async () => {
         if (!novelId || !chapterId) return;
+        setLoadingChapters(true);
         try {
             const response = await api.get(`/novels/${novelId}/chapters/${chapterId}`);
             setChapter(response.data);
@@ -55,6 +61,8 @@ const EditorPage: React.FC = () => {
         } catch (err) {
             console.error('Failed to fetch chapter', err);
             setError(t('Failed to load chapter data.'));
+        } finally {
+            setLoadingChapters(false);
         }
     }, [novelId, chapterId, form, t]);
 
@@ -79,17 +87,15 @@ const EditorPage: React.FC = () => {
                 return mergedHistory.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
             });
 
-            setNovel(prevNovel => {
-                if (prevNovel && response.data.status && response.data.status !== prevNovel.status) {
-                    return { ...prevNovel, status: response.data.status };
-                }
-                return prevNovel;
-            });
+            if (response.data.status !== novel?.status) {
+                fetchNovelAndHistory();
+            }
+
             setRefreshChapterList(prev => prev + 1);
         } catch (err) {
             console.error('Failed to fetch progress', err);
         }
-    }, [novelId]);
+    }, [novelId, novel?.status, fetchNovelAndHistory]);
 
     useEffect(() => {
         fetchNovelAndHistory();
@@ -200,7 +206,7 @@ const EditorPage: React.FC = () => {
             <Col xs={24} md={16}>
                 <Card>
                     <Title level={2}>{novel?.title}</Title>
-                    <Paragraph type="secondary">{novel?.description}</Paragraph>
+                    <Paragraph style={{maxHeight:'200px',overflowY:'auto'}} type="secondary">{novel?.description}</Paragraph>
                     <Paragraph><strong>{t('状态:')}</strong> <Tag color={novel?.status === 'Writing' ? 'green' : 'volcano'}>{novel?.status}</Tag></Paragraph>
 
                     <Space style={{ marginBottom: '24px' }} wrap>
@@ -209,7 +215,7 @@ const EditorPage: React.FC = () => {
                     </Space>
                 </Card>
                 <Card style={{ marginTop: '24px' }}>
-                        <ChapterList novelId={novelId} refresh={refreshChapterList} />
+                        <ChapterList novelId={novelId} refresh={refreshChapterList} loading={loadingChapters} defaultChapters={novel?.chapters} />
                   
                 </Card>
             </Col>

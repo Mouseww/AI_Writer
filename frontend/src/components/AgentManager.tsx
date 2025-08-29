@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Agent } from '../types';
-import { Button, Modal, Form, Input, Select, InputNumber, Table, Space, Popconfirm, message } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Modal, Form, Input, Select, InputNumber, Table, Space, Popconfirm, message, Dropdown, Menu } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
@@ -19,6 +19,15 @@ const AgentManager: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
     const [form] = Form.useForm();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchAgents = async () => {
         try {
@@ -85,20 +94,37 @@ const AgentManager: React.FC = () => {
     };
 
     const columns = [
-        { title: t('Name'), dataIndex: 'name', key: 'name' },
-        { title: t('Model'), dataIndex: 'model', key: 'model' },
-        { title: t('Order'), dataIndex: 'order', key: 'order' },
+        { title: t('Name'), dataIndex: 'name', key: 'name', responsive: ['xs', 'sm', 'md', 'lg', 'xl'] },
+        { title: t('Model'), dataIndex: 'model', key: 'model', responsive: ['md'] },
+        { title: t('Order'), dataIndex: 'order', key: 'order', responsive: ['lg'] },
         {
             title: t('Action'),
             key: 'action',
-            render: (text: string, record: Agent) => (
-                <Space size="middle">
-                    <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
-                    <Popconfirm title={t("Are you sure to delete this agent?")} onConfirm={() => handleDeleteAgent(record.id)}>
-                        <Button icon={<DeleteOutlined />} danger />
-                    </Popconfirm>
-                </Space>
-            ),
+            render: (text: string, record: Agent) => {
+                const menu = (
+                    <Menu>
+                        <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => showModal(record)}>{t('Edit')}</Menu.Item>
+                        <Menu.Item key="delete" icon={<DeleteOutlined />}>
+                            <Popconfirm title={t("Are you sure to delete this agent?")} onConfirm={() => handleDeleteAgent(record.id)}>
+                                {t('Delete')}
+                            </Popconfirm>
+                        </Menu.Item>
+                    </Menu>
+                );
+
+                return isMobile ? (
+                    <Dropdown overlay={menu} trigger={['click']}>
+                        <Button icon={<MoreOutlined />} />
+                    </Dropdown>
+                ) : (
+                    <Space size="middle">
+                        <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
+                        <Popconfirm title={t("Are you sure to delete this agent?")} onConfirm={() => handleDeleteAgent(record.id)}>
+                            <Button icon={<DeleteOutlined />} danger />
+                        </Popconfirm>
+                    </Space>
+                );
+            },
         },
     ];
 
@@ -137,7 +163,7 @@ const AgentManager: React.FC = () => {
                     </Form.Item>
                 </Form>
             </Modal>
-            <Table columns={columns} dataSource={agents} rowKey="id" />
+            <Table columns={columns} dataSource={agents} rowKey="id" scroll={{ x: 'max-content' }} />
         </div>
     );
 };

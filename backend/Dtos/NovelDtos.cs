@@ -18,9 +18,6 @@ namespace AIWriter.Dtos
         public string Title { get; set; }
 
         public string? Description { get; set; }
-        
-        [Required]
-        public string Status { get; set; }
     }
 
     public class WriteRequestDto

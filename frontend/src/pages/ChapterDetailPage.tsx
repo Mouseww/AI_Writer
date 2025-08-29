@@ -4,26 +4,35 @@ import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { Chapter } from '../types';
 import { toLocalTime } from '../utils/time';
+import { Spin } from 'antd';
 
 const ChapterDetailPage: React.FC = () => {
     const { t } = useTranslation();
     const { novelId, chapterId } = useParams<{ novelId: string, chapterId: string }>();
     const [chapter, setChapter] = useState<Chapter | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchChapter = async () => {
             if (novelId && chapterId) {
+                setLoading(true);
                 try {
                     const response = await api.get(`/novels/${novelId}/chapters/${chapterId}`);
                     setChapter(response.data);
                 } catch (error) {
                     console.error(t("Failed to fetch chapter"), error);
+                } finally {
+                    setLoading(false);
                 }
             }
         };
 
         fetchChapter();
     }, [novelId, chapterId, t]);
+
+    if (loading) {
+        return <Spin size="large" style={{ display: 'block', margin: '50px auto' }} />;
+    }
 
     if (!chapter) {
         return <p>{t('正在加载章节...')}</p>;

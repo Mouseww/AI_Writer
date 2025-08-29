@@ -36,8 +36,8 @@ namespace AIWriter.Services
                 {
                     model = model,
                     messages = messages,
-                    temperature = 0.7,
-                    top_p = 1,
+                    temperature = 0.6,
+                    top_p =0.9,
                     frequency_penalty = 0.8,
                     presence_penalty = 0.5
                 };

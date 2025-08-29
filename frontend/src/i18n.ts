@@ -157,6 +157,11 @@ const resources = {
       "Are you sure to delete this chapter?": "Are you sure to delete this chapter?",
       "字数:": "Word Count:",
 
+      // ChapterList
+      "Content copied to clipboard!": "Content copied to clipboard!",
+      "Failed to copy content.": "Failed to copy content.",
+      "Copy Content": "Copy Content",
+
       // ChapterDetailPage
       "正在加载章节...": "Loading chapter...",
       "创建于:": "Created at:",
@@ -220,6 +225,9 @@ const resources = {
       "Add Agent": "添加代理",
 
       // EditorPage
+      "Copy Content": "复制正文",
+      "Content copied to clipboard!": "正文已复制到剪贴板！",
+      "Failed to copy content.": "复制正文失败。",
       "Failed to load novel data.": "加载小说数据失败。",
       "Failed to load chapter data.": "加载章节数据失败。",
       "Failed to send message.": "发送消息失败。",

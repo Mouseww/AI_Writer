@@ -71,6 +71,11 @@ namespace AIWriter.Controllers
             if (historyItem == null || historyItem.NovelId != novelId) return NotFound();
 
             historyItem.Content = updateDto.Content;
+            if(historyItem.Content.Length < 2000)
+            {
+                historyItem.Abstract = historyItem.Content;
+            }
+
             await _context.SaveChangesAsync();
 
             return NoContent();

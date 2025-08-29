@@ -8,6 +8,7 @@ using System.Security.Claims;
 using AIWriter.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.HttpResults;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AIWriter.Controllers
 {
@@ -54,7 +55,7 @@ namespace AIWriter.Controllers
             var userId = GetUserId();
             var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
             novel.Chapters = await _context.Chapters.Where(c => c.NovelId == novel.Id).ToListAsync();
-            novel.ConversationHistories = await _context.ConversationHistories.Where(c => c.NovelId == novel.Id).ToListAsync();
+            novel.ConversationHistories = await _context.ConversationHistories.Include(x=>x.Agent).Where(c => c.NovelId == novel.Id).ToListAsync();
 
 
             if (novel == null)
@@ -110,8 +111,6 @@ namespace AIWriter.Controllers
 
             novel.Title = novelDto.Title;
             novel.Description = novelDto.Description;
-            novel.Status = novelDto.Status;
-
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -231,7 +230,7 @@ namespace AIWriter.Controllers
 
             var chapters = await _context.Chapters
                 .Where(c => c.NovelId == id)
-                .Select(x => new ChapterModel { Id = x.Id, NovelId = x.NovelId, Title = x.Title, Order = x.Order, WordCount = x.WordCount, CreatedAt = x.CreatedAt, LastUpdatedAt = x.LastUpdatedAt })
+                .Select(x => new ChapterModel { Id = x.Id, NovelId = x.NovelId, Title = x.Title, Order = x.Order, WordCount = x.WordCount, CreatedAt = x.CreatedAt, LastUpdatedAt = x.LastUpdatedAt, Content = x.Content })
                 .OrderBy(c => c.Order)
             .ToListAsync();
 
@@ -337,5 +336,6 @@ namespace AIWriter.Controllers
 
             return Ok();
         }
+
     }
 }
