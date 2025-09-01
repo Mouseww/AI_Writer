@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AIWriter.Services.Interfaces;
 using AutoMapper;
 using AIWriter.Vos;
+using AIWriter.Extensions;
 
 namespace AIWriter.Services.Implementations
 {
@@ -52,7 +53,7 @@ namespace AIWriter.Services.Implementations
                 Title = chapterDto.Title,
                 Content = chapterDto.Content,
                 Order = chapterDto.Order,
-                WordCount = chapterDto.WordCount
+                WordCount = chapterDto.Content.GetChineseCharCount()
             };
 
             _context.Chapters.Add(chapter);
@@ -74,7 +75,7 @@ namespace AIWriter.Services.Implementations
             chapter.Title = chapterDto.Title;
             chapter.Content = chapterDto.Content;
             chapter.Order = chapterDto.Order;
-            chapter.WordCount = chapterDto.WordCount;
+            chapter.WordCount = chapterDto.Content.GetChineseCharCount();
 
             _context.Chapters.Update(chapter);
             await _context.SaveChangesAsync();

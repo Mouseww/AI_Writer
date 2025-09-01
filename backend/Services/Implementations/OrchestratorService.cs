@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using AIWriter.Services.Interfaces; // Added using directive
+using AIWriter.Services.Interfaces;
+using AIWriter.Extensions; // Added using directive
 
 namespace AIWriter.Services.Implementations // Updated namespace
 {
@@ -119,7 +120,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
 
 
                         passed = !optimizerOutput.Contains("不满意") && optimizerOutput.Contains("满意");
-                        if (!passed && !cancellationToken.IsCancellationRequested)
+                        if (!passed || cancellationToken.IsCancellationRequested)
                         {
                             continue;
                         }
@@ -180,7 +181,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                             Title = title,
                             Content = content,
                             Order = (lastChapter?.Order ?? 0) + 1,
-                            WordCount = GetWordCount(content),
+                            WordCount = content.GetChineseCharCount(),
                             CreatedAt = DateTime.UtcNow,
                             LastUpdatedAt = DateTime.UtcNow
                         };
@@ -205,21 +206,6 @@ namespace AIWriter.Services.Implementations // Updated namespace
             }
         }
 
-        private int GetWordCount(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return 0;
-            }
-
-            // Count Chinese characters
-            int chineseCount = Regex.Matches(text, "[\u4e00-\u9fa5]").Count;
-
-            // Count English words and numbers
-            int otherCount = Regex.Matches(text, "[a-zA-Z0-9]+").Count;
-
-            return chineseCount + otherCount;
-        }
 
         private List<Message> BuildMessages(Novel novel, Agent agent, List<ConversationHistory> histories)
         {
