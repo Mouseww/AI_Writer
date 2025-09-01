@@ -19,6 +19,7 @@ const EditNovelPage: React.FC = () => {
                 const response = await api.get<Novel>(`/novels/${id}`);
                 form.setFieldsValue(response.data);
             } catch (err) {
+                
                 antdMessage.error(t('Failed to load novel data.'));
             }
         };

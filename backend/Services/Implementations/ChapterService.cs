@@ -51,7 +51,8 @@ namespace AIWriter.Services.Implementations
                 NovelId = novelId,
                 Title = chapterDto.Title,
                 Content = chapterDto.Content,
-                Order = chapterDto.Order
+                Order = chapterDto.Order,
+                WordCount = chapterDto.WordCount
             };
 
             _context.Chapters.Add(chapter);
@@ -73,6 +74,7 @@ namespace AIWriter.Services.Implementations
             chapter.Title = chapterDto.Title;
             chapter.Content = chapterDto.Content;
             chapter.Order = chapterDto.Order;
+            chapter.WordCount = chapterDto.WordCount;
 
             _context.Chapters.Update(chapter);
             await _context.SaveChangesAsync();

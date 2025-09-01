@@ -18,8 +18,8 @@ api.interceptors.request.use(
   }
 );
 
-export const createChapter = (novelId: number, title: string, content: string) => {
-  return api.post(`/novels/${novelId}/chapters`, { title, content });
+export const createChapter = (novelId: number, title: string, content: string, wordCount: number) => {
+  return api.post(`/novels/${novelId}/chapters`, { title, content, wordCount });
 };
 
 export const getChapters = (novelId: number) => {
@@ -30,8 +30,8 @@ export const getChapter = (novelId: number, chapterId: number) => {
   return api.get(`/novels/${novelId}/chapters/${chapterId}`);
 };
 
-export const updateChapter = (novelId: number, chapterId: number, title: string, content: string) => {
-  return api.put(`/novels/${novelId}/chapters/${chapterId}`, { title, content });
+export const updateChapter = (novelId: number, chapterId: number, title: string, content: string, wordCount: number) => {
+  return api.put(`/novels/${novelId}/chapters/${chapterId}`, { title, content, wordCount });
 };
 
 export const deleteChapter = (novelId: number, chapterId: number) => {

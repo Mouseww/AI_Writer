@@ -35,6 +35,7 @@ namespace AIWriter.Dtos
         [Required]
         public string Content { get; set; }
         public int Order { get; set; }
+        public int WordCount { get; set; }
     }
 
     public class ChapterUpdateDto
@@ -46,6 +47,7 @@ namespace AIWriter.Dtos
         [Required]
         public string Content { get; set; }
         public int Order { get; set; }
+        public int WordCount { get; set; }
     }
 
     public class ChapterDto

@@ -119,7 +119,8 @@ const EditorPage: React.FC = () => {
 
         try {
             if (chapter) {
-                await updateChapter(novelId, chapter.id, values.title, values.content);
+                const wordCount = values.content.split(/\s+/).filter(Boolean).length;
+                await updateChapter(novelId, chapter.id, values.title, values.content, wordCount);
                 message.success(t("Chapter updated successfully!"));
             }
             navigate(`/editor/novel/${novelId}`);
@@ -148,8 +149,8 @@ const EditorPage: React.FC = () => {
                 title = rawContent.substring(0, 20) + "...";
                 content = rawContent;
             }
-
-            await createChapter(novelId, title, content);
+            const wordCount = content.split(/\s+/).filter(Boolean).length;
+            await createChapter(novelId, title, content, wordCount);
             message.success(t("对话已保存为新章节!"));
             setRefreshChapterList(prev => prev + 1); // Refresh chapter list
         } catch (err) {

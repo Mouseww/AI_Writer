@@ -68,7 +68,28 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh, loading, de
             await navigator.clipboard.writeText(content);
             message.success(t('Content copied to clipboard!'));
         } catch (err) {
-            message.error(t('Failed to copy content.'));
+            console.warn('navigator.clipboard.writeText failed, trying fallback.', err);
+            // Fallback for older browsers or when the modern API fails
+            const textArea = document.createElement("textarea");
+            textArea.value = content;
+            textArea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    message.success(t('Content copied to clipboard!'));
+                } else {
+                    message.error(t('Failed to copy content.'));
+                }
+            } catch (fallbackErr) {
+                console.error('Fallback copy method failed.', fallbackErr);
+                message.error(t('Failed to copy content.'));
+            }
+            document.body.removeChild(textArea);
         }
     };
 
