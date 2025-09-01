@@ -15,6 +15,8 @@ namespace AIWriter.Data
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<Agent> Agents { get; set; }
         public DbSet<ConversationHistory> ConversationHistories { get; set; }
+        public DbSet<NovelPlatform> NovelPlatforms { get; set; }
+        public DbSet<UserNovelPlatform> UserNovelPlatforms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

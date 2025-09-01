@@ -23,6 +23,7 @@ builder.Services.AddScoped<AIWriter.Services.Interfaces.IChapterService, AIWrite
 builder.Services.AddScoped<AIWriter.Services.Interfaces.INovelService, AIWriter.Services.Implementations.NovelService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.IAgentService, AIWriter.Services.Implementations.AgentService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.ISettingsService, AIWriter.Services.Implementations.SettingsService>();
+builder.Services.AddScoped<AIWriter.Services.Interfaces.IPlatformService, AIWriter.Services.Implementations.PlatformService>();
 builder.Services.AddSingleton<AIWriter.Services.Interfaces.IOrchestratorService, AIWriter.Services.Implementations.OrchestratorService>();
 
 builder.Services.AddAutoMapper(typeof(Program));

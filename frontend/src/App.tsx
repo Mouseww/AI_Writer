@@ -12,6 +12,7 @@ import CreateNovelPage from './pages/CreateNovelPage';
 import EditNovelPage from './pages/EditNovelPage';
 import AgentsPage from './pages/AgentsPage';
 import ChapterDetailPage from './pages/ChapterDetailPage';
+import PlatformsPage from './pages/PlatformsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const { Header, Content, Footer } = Layout;
@@ -81,6 +82,7 @@ const AppContent: React.FC = () => {
     <Menu theme="dark" mode={isMobile ? "vertical" : "horizontal"} defaultSelectedKeys={['/']} selectedKeys={[window.location.pathname]} style={{ flex: 1, minWidth: 0 }}>
       <Menu.Item key="/"><Link to="/">{t('Dashboard')}</Link></Menu.Item>
       <Menu.Item key="/agents"><Link to="/agents">{t('AI Agents')}</Link></Menu.Item>
+      <Menu.Item key="/platforms"><Link to="/platforms">{t('Platforms')}</Link></Menu.Item>
     </Menu>
   );
 
@@ -130,6 +132,7 @@ const AppContent: React.FC = () => {
             <Route element={<ProtectedRoute />}>
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/agents" element={<AgentsPage />} />
+              <Route path="/platforms" element={<PlatformsPage />} />
               <Route path="/create-novel" element={<CreateNovelPage />} />
               <Route path="/novels/:id/edit" element={<EditNovelPage />} />
               <Route path="/novel/:novelId/chapter/:chapterId" element={<ChapterDetailPage />} />

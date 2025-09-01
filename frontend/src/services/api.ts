@@ -46,4 +46,20 @@ export const updateNovel = (id: number, data: any) => {
   return api.put(`/novels/${id}`, data);
 };
 
+export const getAllNovelPlatforms = () => {
+  return api.get('/platforms/novel-platforms');
+};
+
+export const getUserNovelPlatforms = () => {
+  return api.get('/platforms/user-novel-platforms');
+};
+
+export const createUserNovelPlatform = (data: any) => {
+  return api.post('/platforms/user-novel-platforms', data);
+};
+
+export const deleteUserNovelPlatform = (id: number) => {
+  return api.delete(`/platforms/user-novel-platforms/${id}`);
+};
+
 export default api;

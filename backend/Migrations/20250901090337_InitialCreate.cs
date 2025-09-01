@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AIWriter.Migrations
+namespace backend.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -13,6 +13,23 @@ namespace AIWriter.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "NovelPlatforms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PublishUrl = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NovelPlatforms", x => x.Id);
+                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -34,25 +51,56 @@ namespace AIWriter.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Novels",
+                name: "Agents",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
+                    Prompt = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                    Model = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Order = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Novels", x => x.Id);
+                    table.PrimaryKey("PK_Agents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Novels_Users_UserId",
+                        name: "FK_Agents_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserNovelPlatforms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    NovelPlatformId = table.Column<int>(type: "int", nullable: false),
+                    PlatformUserName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PlatformPassword = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserNovelPlatforms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserNovelPlatforms_NovelPlatforms_NovelPlatformId",
+                        column: x => x.NovelPlatformId,
+                        principalTable: "NovelPlatforms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserNovelPlatforms_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -85,49 +133,59 @@ namespace AIWriter.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "GeneratedContents",
+                name: "Novels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    NovelId = table.Column<int>(type: "int", nullable: false),
-                    Chapter = table.Column<int>(type: "int", nullable: false),
-                    Content = table.Column<string>(type: "longtext", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastUpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UserNovelPlatformId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GeneratedContents", x => x.Id);
+                    table.PrimaryKey("PK_Novels", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GeneratedContents_Novels_NovelId",
-                        column: x => x.NovelId,
-                        principalTable: "Novels",
+                        name: "FK_Novels_UserNovelPlatforms_UserNovelPlatformId",
+                        column: x => x.UserNovelPlatformId,
+                        principalTable: "UserNovelPlatforms",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Novels_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Roles",
+                name: "Chapters",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     NovelId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    Title = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Prompt = table.Column<string>(type: "longtext", nullable: false)
+                    Content = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Model = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Order = table.Column<int>(type: "int", nullable: false)
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    WordCount = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    LastUpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
+                    table.PrimaryKey("PK_Chapters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Roles_Novels_NovelId",
+                        name: "FK_Chapters_Novels_NovelId",
                         column: x => x.NovelId,
                         principalTable: "Novels",
                         principalColumn: "Id",
@@ -142,43 +200,51 @@ namespace AIWriter.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     NovelId = table.Column<int>(type: "int", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    AgentId = table.Column<int>(type: "int", nullable: true),
                     Content = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Abstract = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ShowInHistory = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    IsManualEdit = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsUserMessage = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ConversationHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ConversationHistories_Agents_AgentId",
+                        column: x => x.AgentId,
+                        principalTable: "Agents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ConversationHistories_Novels_NovelId",
                         column: x => x.NovelId,
                         principalTable: "Novels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ConversationHistories_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ConversationHistories_NovelId",
-                table: "ConversationHistories",
+                name: "IX_Agents_UserId",
+                table: "Agents",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Chapters_NovelId",
+                table: "Chapters",
                 column: "NovelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ConversationHistories_RoleId",
+                name: "IX_ConversationHistories_AgentId",
                 table: "ConversationHistories",
-                column: "RoleId");
+                column: "AgentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GeneratedContents_NovelId",
-                table: "GeneratedContents",
+                name: "IX_ConversationHistories_NovelId",
+                table: "ConversationHistories",
                 column: "NovelId");
 
             migrationBuilder.CreateIndex(
@@ -187,9 +253,19 @@ namespace AIWriter.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_NovelId",
-                table: "Roles",
-                column: "NovelId");
+                name: "IX_Novels_UserNovelPlatformId",
+                table: "Novels",
+                column: "UserNovelPlatformId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserNovelPlatforms_NovelPlatformId",
+                table: "UserNovelPlatforms",
+                column: "NovelPlatformId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserNovelPlatforms_UserId",
+                table: "UserNovelPlatforms",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSettings_UserId",
@@ -201,19 +277,25 @@ namespace AIWriter.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ConversationHistories");
+                name: "Chapters");
 
             migrationBuilder.DropTable(
-                name: "GeneratedContents");
+                name: "ConversationHistories");
 
             migrationBuilder.DropTable(
                 name: "UserSettings");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Agents");
 
             migrationBuilder.DropTable(
                 name: "Novels");
+
+            migrationBuilder.DropTable(
+                name: "UserNovelPlatforms");
+
+            migrationBuilder.DropTable(
+                name: "NovelPlatforms");
 
             migrationBuilder.DropTable(
                 name: "Users");

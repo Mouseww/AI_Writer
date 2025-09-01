@@ -28,6 +28,35 @@ namespace AIWriter.Models
         public string? EncryptedApiKey { get; set; } // Should be encrypted
     }
 
+    public class NovelPlatform
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string Name { get; set; }
+        [Required]
+        public string PublishUrl { get; set; }
+    }
+
+    public class UserNovelPlatform
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        public int UserId { get; set; }
+        [ForeignKey("UserId")]
+        public User User { get; set; }
+        [Required]
+        public int NovelPlatformId { get; set; }
+        [ForeignKey("NovelPlatformId")]
+        public NovelPlatform NovelPlatform { get; set; }
+        [Required]
+        public string PlatformUserName { get; set; }
+        [Required]
+        public string PlatformPassword { get; set; } // This should be encrypted
+    }
+
     public class Novel
     {
         [Key]
@@ -44,7 +73,11 @@ namespace AIWriter.Models
         [MaxLength(50)]
         public string Status { get; set; } = "Paused"; // e.g., "Writing", "Paused", "Completed"
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+
+        public int? UserNovelPlatformId { get; set; }
+        [ForeignKey("UserNovelPlatformId")]
+        public UserNovelPlatform? UserNovelPlatform { get; set; }
+
         [NotMapped] // This property will not be stored in the database
         public int TotalWordCount { get; set; }
 

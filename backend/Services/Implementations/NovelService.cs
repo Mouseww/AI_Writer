@@ -87,6 +87,7 @@ namespace AIWriter.Services.Implementations
 
             novel.Title = novelDto.Title;
             novel.Description = novelDto.Description;
+            novel.UserNovelPlatformId = novelDto.UserNovelPlatformId;
             await _context.SaveChangesAsync();
             return _mapper.Map<NovelVo>(novel);
         }

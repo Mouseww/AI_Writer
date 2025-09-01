@@ -7,6 +7,21 @@ export interface Novel {
     totalWordCount: number;
     latestChapterTitle?: string; // Optional, as a novel might not have chapters yet
     chapters?: Chapter[] ;
+    userNovelPlatformId?: number;
+}
+
+export interface NovelPlatform {
+    id: number;
+    name: string;
+    publishUrl: string;
+}
+
+export interface UserNovelPlatform {
+    id: number;
+    userId: number;
+    novelPlatformId: number;
+    platformUserName: string;
+    novelPlatformName: string;
 }
 
 export interface Chapter {
