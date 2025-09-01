@@ -1,11 +1,11 @@
 using AIWriter.Data;
 using AIWriter.Dtos;
 using AIWriter.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using AIWriter.Services.Interfaces; // Added using directive
+using AIWriter.Services.Interfaces;
+using Microsoft.EntityFrameworkCore; // Added using directive
 
 namespace AIWriter.Services.Implementations // Updated namespace
 {
@@ -22,7 +22,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
             _scopeFactory = scopeFactory;
         }
 
-        public async Task<string> GenerateText(string model, List<Message> messages, int retry = 0)
+        public async Task<string> GenerateText(string model, List<Message> messages, int retry = 0, CancellationToken cancellationToken=new CancellationToken())
         {
             using (var scope = _scopeFactory.CreateScope())
             {
@@ -55,14 +55,14 @@ namespace AIWriter.Services.Implementations // Updated namespace
 
                 try
                 {
-                    var response = await client.PostAsync(requestUrl, content);
+                    var response = await client.PostAsync(requestUrl, content, cancellationToken);
 
                     if (!response.IsSuccessStatusCode)
                     {
                         if (retry < maxRetry)
                         {
                             retry++;
-                            return await GenerateText(model, messages, retry);
+                            return await GenerateText(model, messages, retry, cancellationToken);
                         }
 
                         var errorBody = await response.Content.ReadAsStringAsync();
@@ -82,7 +82,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                                 if (retry < maxRetry)
                                 {
                                     retry++;
-                                    return await GenerateText(model, messages, retry);
+                                    return await GenerateText(model, messages, retry, cancellationToken);
                                 }
 
                                 return "[ERROR: Could not parse content from AI response.]";
@@ -97,7 +97,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                     {
                         retry++;
                         await Task.Delay(1000);
-                        return await GenerateText(model, messages, retry);
+                        return await GenerateText(model, messages, retry, cancellationToken);
                     }
 
                     return "[ERROR: Could not parse AI response. Unexpected format.]";
@@ -107,7 +107,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                     if (retry < maxRetry)
                     {
                         retry++;
-                        return await GenerateText(model, messages, retry);
+                        return await GenerateText(model, messages, retry, cancellationToken);
                     }
 
                     return $"[ERROR: An exception occurred while calling the AI API: {ex.Message}]";

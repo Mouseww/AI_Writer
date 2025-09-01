@@ -7,6 +7,6 @@ namespace AIWriter.Services.Interfaces
 {
     public interface IAIClientService
     {
-        Task<string> GenerateText(string model, List<Message> messages, int retry = 0);
+        Task<string> GenerateText(string model, List<Message> messages, int retry = 0, CancellationToken cancellationToken = new CancellationToken());
     }
 }

@@ -92,7 +92,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
                         }
 
                         var writerMessages = BuildMessages(novel, writer, history);
-                        var writerOutput = await aiClient.GenerateText(writer.Model, writerMessages);
+                        var writerOutput = await aiClient.GenerateText(writer.Model, writerMessages, cancellationToken: cancellationToken);
                         history.Insert(0, new ConversationHistory
                         {
                             NovelId = novelId,
@@ -106,7 +106,7 @@ namespace AIWriter.Services.Implementations // Updated namespace
 
                         // 2. Optimizer Agent
                         var optimizerMessages = BuildMessages(novel, optimizer, history);
-                        var optimizerOutput = await aiClient.GenerateText(optimizer.Model, optimizerMessages);
+                        var optimizerOutput = await aiClient.GenerateText(optimizer.Model, optimizerMessages, cancellationToken: cancellationToken);
 
                         history.Insert(0, new ConversationHistory
                         {
