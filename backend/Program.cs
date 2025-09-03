@@ -18,6 +18,8 @@ builder.Services.AddHttpClient("AiClient", client =>
 {
     client.Timeout = TimeSpan.FromMinutes(20);
 });
+
+builder.Services.AddSingleton<AIWriter.PublishingService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.IAIClientService, AIWriter.Services.Implementations.AIClientService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.IChapterService, AIWriter.Services.Implementations.ChapterService>();
 builder.Services.AddScoped<AIWriter.Services.Interfaces.INovelService, AIWriter.Services.Implementations.NovelService>();

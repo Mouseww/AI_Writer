@@ -62,4 +62,8 @@ export const deleteUserNovelPlatform = (id: number) => {
   return api.delete(`/platforms/user-novel-platforms/${id}`);
 };
 
+export const publishChapter = (novelId: number, chapterId: number) => {
+  return api.post('/platforms/publish-chapter', { novelId, chapterId });
+};
+
 export default api;

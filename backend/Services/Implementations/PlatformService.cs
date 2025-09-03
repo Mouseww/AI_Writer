@@ -13,9 +13,12 @@ namespace AIWriter.Services.Implementations
     {
         private readonly ApplicationDbContext _context;
 
-        public PlatformService(ApplicationDbContext context)
+        PublishingService _publishingService;
+
+        public PlatformService(ApplicationDbContext context,PublishingService publishingService)
         {
             _context = context;
+            _publishingService=publishingService;
         }
 
         public async Task<IEnumerable<NovelPlatformDto>> GetAllNovelPlatformsAsync()
@@ -81,6 +84,23 @@ namespace AIWriter.Services.Implementations
                 _context.UserNovelPlatforms.Remove(userNovelPlatform);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task PublishChapterAsync(int userId, int novelId, int chapterId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            var novel = await _context.Novels.Include(n => n.UserNovelPlatform).ThenInclude(unp => unp.NovelPlatform).FirstOrDefaultAsync(n => n.Id == novelId);
+            var chapter = await _context.Chapters.FindAsync(chapterId);
+
+            if (user == null || novel == null || chapter == null || novel.UserNovelPlatform == null)
+            {
+                throw new System.Exception("User, novel, chapter, or platform not found.");
+            }
+
+            var platform = novel.UserNovelPlatform.NovelPlatform;
+            var platformCredentials = novel.UserNovelPlatform;
+
+            await _publishingService.PublishChapterAsync(string.Format( platform.PublishUrl,novel.PlatformNumber), platformCredentials.PlatformUserName, platformCredentials.PlatformPassword, chapter.Title, chapter.Content);
         }
     }
 }

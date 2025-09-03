@@ -10,5 +10,6 @@ namespace AIWriter.Services.Interfaces
         Task<IEnumerable<UserNovelPlatformDto>> GetUserNovelPlatformsAsync(int userId);
         Task<UserNovelPlatformDto> CreateUserNovelPlatformAsync(int userId, UserNovelPlatformCreateDto dto);
         Task DeleteUserNovelPlatformAsync(int userId, int id);
+        Task PublishChapterAsync(int userId, int novelId, int chapterId);
     }
 }

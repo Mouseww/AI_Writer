@@ -15,6 +15,9 @@ namespace AIWriter.Vos
         public DateTime CreatedAt { get; set; }
         public int TotalWordCount { get; set; }
         public string? LatestChapterTitle { get; set; }
+        public int? UserNovelPlatformId { get; set; }
+        public string? PlatformNumber { get; set; }
+        public bool AutoPublish { get; set; }
         public ICollection<ChapterVo> Chapters { get; set; } // Nested VO
 
         public ICollection<ConversationHistoryVo> ConversationHistories { get; set; } // Nested VO

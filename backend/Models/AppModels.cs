@@ -84,6 +84,11 @@ namespace AIWriter.Models
         [NotMapped] // This property will not be stored in the database
         public string? LatestChapterTitle { get; set; }
 
+        public string? PlatformNumber { get; set; }
+
+        public bool AutoPublish { get; set; } = false;
+
+
         public ICollection<ConversationHistory> ConversationHistories { get; set; }
         public ICollection<Chapter> Chapters { get; set; }
     }

@@ -9,6 +9,7 @@ namespace AIWriter.Dtos
         public string Title { get; set; }
 
         public string? Description { get; set; }
+        public bool AutoPublish { get; set; } = false;
     }
 
     public class NovelUpdateDto
@@ -19,6 +20,8 @@ namespace AIWriter.Dtos
 
         public string? Description { get; set; }
         public int? UserNovelPlatformId { get; set; }
+        public string? PlatformNumber { get; set; }
+        public bool AutoPublish { get; set; }
     }
 
     public class NovelPlatformDto
@@ -87,5 +90,14 @@ namespace AIWriter.Dtos
         public int WordCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdatedAt { get; set; }
+    }
+
+    public class PublishChapterDto
+    {
+        [Required]
+        public int NovelId { get; set; }
+
+        [Required]
+        public int ChapterId { get; set; }
     }
 }

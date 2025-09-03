@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api, { getUserNovelPlatforms } from '../services/api.ts';
 import { Novel, UserNovelPlatform } from '../types';
-import { Form, Input, Button, Card, message as antdMessage, Select } from 'antd';
+import { Form, Input, Button, Card, message as antdMessage, Select, Switch } from 'antd';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,12 +14,15 @@ const EditNovelPage: React.FC = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const [userPlatforms, setUserPlatforms] = useState<UserNovelPlatform[]>([]);
+    const [isAutoPublishEnabled, setIsAutoPublishEnabled] = useState(false);
 
     useEffect(() => {
         const fetchNovel = async () => {
             try {
                 const response = await api.get<Novel>(`/novels/${id}`);
-                form.setFieldsValue(response.data);
+                const novelData = response.data;
+                form.setFieldsValue(novelData);
+                setIsAutoPublishEnabled(!!novelData.userNovelPlatformId && !!novelData.platformNumber);
             } catch (err) {
                 
                 antdMessage.error(t('Failed to load novel data.'));
@@ -39,9 +42,15 @@ const EditNovelPage: React.FC = () => {
         fetchUserPlatforms();
     }, [id, t, form]);
 
-    const handleSubmit = async (values: { title: string, description: string, userNovelPlatformId: number }) => {
+    const handleFormChange = () => {
+        const platformId = form.getFieldValue('userNovelPlatformId');
+        const platformNumber = form.getFieldValue('platformNumber');
+        setIsAutoPublishEnabled(!!platformId && !!platformNumber);
+    };
+
+    const handleSubmit = async (values: Novel) => {
         try {
-            await api.put(`/novels/${id}`, { id: parseInt(id!, 10), ...values });
+            await api.put(`/novels/${id}`, { ...values, id: parseInt(id!, 10) });
             antdMessage.success(t('Novel updated successfully!'));
             navigate('/'); // Redirect to dashboard on success
         } catch (err) {
@@ -53,7 +62,7 @@ const EditNovelPage: React.FC = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: '50px' }}>
             <Card title={t('Edit Novel')} style={{ width: '100%', maxWidth: '600px' }}>
-                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                <Form form={form} layout="vertical" onFinish={handleSubmit} onValuesChange={handleFormChange}>
                     <Form.Item
                         label={t('Title')}
                         name="title"
@@ -76,6 +85,19 @@ const EditNovelPage: React.FC = () => {
                                 <Option key={p.id} value={p.id}>{p.novelPlatformName} ({p.platformUserName})</Option>
                             ))}
                         </Select>
+                    </Form.Item>
+                    <Form.Item
+                        label={t('Platform Number')}
+                        name="platformNumber"
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label={t('Auto Publish')}
+                        name="autoPublish"
+                        valuePropName="checked"
+                    >
+                        <Switch disabled={!isAutoPublishEnabled} />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit">{t('Save Changes')}</Button>

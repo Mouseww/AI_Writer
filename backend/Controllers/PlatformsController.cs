@@ -49,5 +49,13 @@ namespace AIWriter.Controllers
             await _platformService.DeleteUserNovelPlatformAsync(userId, id);
             return NoContent();
         }
+
+        [HttpPost("publish-chapter")]
+        public async Task<IActionResult> PublishChapter([FromBody] PublishChapterDto dto)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _platformService.PublishChapterAsync(userId, dto.NovelId, dto.ChapterId);
+            return Ok();
+        }
     }
 }

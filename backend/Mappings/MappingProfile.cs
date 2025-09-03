@@ -19,6 +19,8 @@ namespace AIWriter.Mappings
             CreateMap<UserSetting, SettingsViewModel>();
             CreateMap<SettingsUpdateDto, UserSetting>();
             CreateMap<Novel, NovelVo>();
+            CreateMap<NovelCreateDto, Novel>();
+            CreateMap<NovelUpdateDto, Novel>();
             CreateMap<Chapter, ChapterVo>();
             CreateMap<Agent, AgentVo>();
             CreateMap<UserSetting, UserSettingVo>();

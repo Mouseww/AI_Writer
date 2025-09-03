@@ -8,6 +8,8 @@ export interface Novel {
     latestChapterTitle?: string; // Optional, as a novel might not have chapters yet
     chapters?: Chapter[] ;
     userNovelPlatformId?: number;
+    platformNumber?: string;
+    autoPublish: boolean;
 }
 
 export interface NovelPlatform {

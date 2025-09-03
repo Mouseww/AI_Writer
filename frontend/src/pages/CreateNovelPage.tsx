@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { Form, Input, Button, Card, message as antdMessage } from 'antd';
+import { Form, Input, Button, Card, message as antdMessage, Switch } from 'antd';
 
 const { TextArea } = Input;
 
@@ -38,6 +38,13 @@ const CreateNovelPage: React.FC = () => {
                         name="description"
                     >
                         <TextArea rows={4} />
+                    </Form.Item>
+                    <Form.Item
+                        label={t('Auto Publish')}
+                        name="autoPublish"
+                        valuePropName="checked"
+                    >
+                        <Switch disabled={true} />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit">{t('Create Novel')}</Button>

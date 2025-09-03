@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getChapters, deleteChapter } from '../services/api';
+import { getChapters, deleteChapter, publishChapter } from '../services/api';
 import { Chapter } from '../types';
 import { List, Typography, Button, Popconfirm, message, Dropdown, Menu, Space, Spin } from 'antd';
-import { EditOutlined, DeleteOutlined, MoreOutlined, CopyOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, MoreOutlined, CopyOutlined, UploadOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -93,6 +93,15 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh, loading, de
         }
     };
 
+    const handlePublish = async (chapterId: number) => {
+        try {
+            await publishChapter(novelId, chapterId);
+            message.success(t('Chapter published successfully'));
+        } catch (error) {
+            message.error(t('Failed to publish chapter'));
+        }
+    };
+
     const renderItem = (chapter: Chapter) => {
         console.log("Rendering chapter:", chapter);
         const menu = (
@@ -112,6 +121,9 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh, loading, de
                     >
                         {t('删除')}
                     </Popconfirm>
+                </Menu.Item>
+                <Menu.Item key="publish" icon={<UploadOutlined />} onClick={() => handlePublish(chapter.id)}>
+                    {t('发布')}
                 </Menu.Item>
             </Menu>
         );
@@ -137,7 +149,10 @@ const ChapterList: React.FC<ChapterListProps> = ({ novelId, refresh, loading, de
                     <Button icon={<DeleteOutlined />} danger>
                         {t('删除')}
                     </Button>
-                </Popconfirm>
+                </Popconfirm>,
+                <Button icon={<UploadOutlined />} onClick={() => handlePublish(chapter.id)}>
+                    {t('发布')}
+                </Button>
             ]
         );
 
