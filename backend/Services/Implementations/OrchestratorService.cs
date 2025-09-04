@@ -148,8 +148,9 @@ namespace AIWriter.Services.Implementations // Updated namespace
                             content = contentArray[contentArray.Length - 1];
 
 
-                            if (content.GetChineseCharCount()<4000)
+                            if (content.GetChineseCharCount() < 4000)
                             {
+                                passed = false;
                                 history[0].Content = "不满意, 字数不足6000字，请重写此章";
                                 continue;
                             }
@@ -193,14 +194,24 @@ namespace AIWriter.Services.Implementations // Updated namespace
 
                         if (novel.AutoPublish && novel.UserNovelPlatformId.HasValue && !string.IsNullOrEmpty(novel.PlatformNumber))
                         {
+
                             var userPlatform = await dbContext.UserNovelPlatforms
                                 .Include(up => up.NovelPlatform)
                                 .FirstOrDefaultAsync(p => p.Id == novel.UserNovelPlatformId, cancellationToken);
 
                             if (userPlatform != null)
                             {
-                                await _publishingService.PublishChapterAsync(userPlatform.NovelPlatform.PublishUrl, userPlatform.PlatformUserName, userPlatform.PlatformPassword, newChapter.Title, newChapter.Content);
+                                try
+                                {
+                                    await _publishingService.PublishChapterAsync(userPlatform.NovelPlatform.PublishUrl, userPlatform.PlatformUserName, userPlatform.PlatformPassword, newChapter.Title, newChapter.Content);
+                                }
+                                catch
+                                {
+                                    novel.AutoPublish = false;
+                                    await dbContext.SaveChangesAsync();
+                                }
                             }
+
                         }
                     }
 

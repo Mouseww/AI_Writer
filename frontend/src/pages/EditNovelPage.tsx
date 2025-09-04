@@ -15,6 +15,7 @@ const EditNovelPage: React.FC = () => {
     const navigate = useNavigate();
     const [userPlatforms, setUserPlatforms] = useState<UserNovelPlatform[]>([]);
     const [isAutoPublishEnabled, setIsAutoPublishEnabled] = useState(false);
+    const [autoPublish, setAutoPublish] = useState(false);
 
     useEffect(() => {
         const fetchNovel = async () => {
@@ -22,6 +23,7 @@ const EditNovelPage: React.FC = () => {
                 const response = await api.get<Novel>(`/novels/${id}`);
                 const novelData = response.data;
                 form.setFieldsValue(novelData);
+                setAutoPublish(novelData.autoPublish);
                 setIsAutoPublishEnabled(!!novelData.userNovelPlatformId && !!novelData.platformNumber);
             } catch (err) {
                 
@@ -50,7 +52,12 @@ const EditNovelPage: React.FC = () => {
 
     const handleSubmit = async (values: Novel) => {
         try {
-            await api.put(`/novels/${id}`, { ...values, id: parseInt(id!, 10) });
+            const payload = {
+                ...values,
+                id: parseInt(id!, 10),
+                autoPublish: isAutoPublishEnabled ? autoPublish : false,
+            };
+            await api.put(`/novels/${id}`, payload);
             antdMessage.success(t('Novel updated successfully!'));
             navigate('/'); // Redirect to dashboard on success
         } catch (err) {
@@ -94,10 +101,12 @@ const EditNovelPage: React.FC = () => {
                     </Form.Item>
                     <Form.Item
                         label={t('Auto Publish')}
-                        name="autoPublish"
-                        valuePropName="checked"
                     >
-                        <Switch disabled={!isAutoPublishEnabled} />
+                        <Switch
+                            checked={autoPublish}
+                            onChange={setAutoPublish}
+                            disabled={!isAutoPublishEnabled}
+                        />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit">{t('Save Changes')}</Button>

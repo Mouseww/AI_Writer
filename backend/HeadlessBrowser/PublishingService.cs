@@ -98,19 +98,42 @@ namespace AIWriter
         {
             await InitializeCoreAsync();
 
-            lock (_poolLock)
+            while (true)
             {
-                var wrapper = _pagePool.FirstOrDefault(p => !p.IsInUse);
+                PageWrapper wrapper = null;
+                lock (_poolLock)
+                {
+                    wrapper = _pagePool.FirstOrDefault(p => !p.IsInUse);
+                    if (wrapper != null)
+                    {
+                        if (wrapper.Page.IsClosed)
+                        {
+                            // Page is closed, remove it from the pool and continue the loop to find another.
+                            _pagePool.Remove(wrapper);
+                            wrapper = null; // Ensure we don't try to use it.
+                        }
+                        else
+                        {
+                            wrapper.IsInUse = true;
+                            wrapper.LastUsedTime = DateTime.UtcNow;
+                        }
+                    }
+                }
+
                 if (wrapper != null)
                 {
-                    wrapper.IsInUse = true;
-                    wrapper.LastUsedTime = DateTime.UtcNow;
-                    return wrapper;
+                    return wrapper; // Found a usable page.
                 }
-            }
 
-            // No idle page found, create a new one outside the lock
-            return await AddNewPageToPoolAsync(markInUse: true);
+                // No idle page found or the idle page was closed, create a new one.
+                // This is done outside the lock to avoid holding the lock during async operation.
+                var newWrapper = await AddNewPageToPoolAsync(markInUse: true);
+                if (!newWrapper.Page.IsClosed)
+                {
+                    return newWrapper;
+                }
+                // If the new page is somehow closed immediately, the loop will handle it.
+            }
         }
 
         private void ReleasePage(PageWrapper wrapper)
@@ -171,22 +194,33 @@ namespace AIWriter
                 var page = pageWrapper.Page;
 
                 await page.GotoAsync(url);
+                if (!await LoginAsync(page, username, password))
+                {
+                    throw new Exception("登录失败");
+                }
+
                 await page.WaitForSelectorAsync("span.left-input input");
 
                 string chapterNumber = ExtractChapterNumber(title).ToString();
                 await page.WaitForSelectorAsync("#___reactour > div:nth-child(3) > div > div > div.publish-guide-desc");
                 await page.ClickAsync("#app > div > div > div > div.publish-header");
-                await page.FillAsync("span.left-input input", chapterNumber);
+                await page.FillAsync("span.left-input > input", chapterNumber);
                 await page.FillAsync("input[placeholder=\"请输入标题\"]", title.Split("章")[1].Trim());
-                
-                await page.FillAsync("div.syl-editor >> div.ProseMirror", content);
-                
+
+                await page.FillAsync("div.syl-editor > div.ProseMirror", content);
+
                 await page.ClickAsync("#app > div > div > div > div.publish-header > div.publish-header-right > button.arco-btn.arco-btn-secondary.arco-btn-size-default.arco-btn-shape-square.publish-button.auto-editor-next.btn-primary-variant");
-                await Task.Delay(3000);
-                var confirmButton = await page.QuerySelectorAsync("body > div:nth-child(4) > div.arco-modal-wrapper.arco-modal-wrapper-align-center > div > div:nth-child(2) > div.arco-modal-footer > button.arco-btn.arco-btn-primary.arco-btn-size-default.arco-btn-shape-square");
-                if (confirmButton is not null)
+                try
                 {
-                    await confirmButton.ClickAsync();
+                    var confirmButton = await page.WaitForSelectorAsync("body > div:nth-child(4) > div.arco-modal-wrapper.arco-modal-wrapper-align-center > div > div:nth-child(2) > div.arco-modal-footer > button.arco-btn.arco-btn-primary.arco-btn-size-default.arco-btn-shape-square",new PageWaitForSelectorOptions { Timeout=10000});
+                    if (confirmButton is not null)
+                    {
+                        await confirmButton.ClickAsync();
+                    }
+                }
+                catch
+                {
+
                 }
 
                 await page.WaitForSelectorAsync("body > div:nth-child(3) > div.arco-modal-wrapper.arco-modal-wrapper-align-center > div > div.arco-modal-footer > button.arco-btn.arco-btn-primary.arco-btn-size-default.arco-btn-shape-square");
@@ -195,10 +229,8 @@ namespace AIWriter
             }
             catch (Exception)
             {
-                // Re-throw the exception to be handled by the caller.
-                // If "Executable doesn't exist" occurs, it indicates an environment issue (e.g., Docker image misconfiguration)
-                // that should not be fixed at runtime by the application.
                 throw;
+
             }
             finally
             {
@@ -251,6 +283,46 @@ namespace AIWriter
                 await _browser.CloseAsync();
             }
             _playwright?.Dispose();
+        }
+
+        private async Task<bool> LoginAsync(IPage page, string username, string password)
+        {
+            try
+            {
+
+                await page.WaitForSelectorAsync("span.left-input input", new PageWaitForSelectorOptions { Timeout = 10000 });
+                return true;
+            }
+            catch
+            {
+
+                try
+                {
+                    await page.WaitForSelectorAsync("#slogin-pc-login-form");
+                    // switch to password login
+                    await page.ClickAsync("//*[@id=\"slogin-pc-login-form\"]/div[2]/form/div[5]/button");
+
+                    await page.WaitForSelectorAsync("#slogin-pc-login-form");
+
+                    // This is a generic implementation. You will need to adapt the selectors for each specific platform.
+                    await page.FillAsync("input[name='username']", username);
+                    await page.FillAsync("input[type='password']", password);
+
+                    await page.ClickAsync("div[class='arco-checkbox-mask']");
+                    await page.ClickAsync("xpath=//button[span[text()='登录']]");
+                    await page.WaitForNavigationAsync();
+
+                    var cookies = await page.Context.CookiesAsync();
+                    var cookiePath = Path.Combine("HeadlessBrowser", "cookies.json");
+                    string json = JsonSerializer.Serialize(cookies);
+                    await File.WriteAllTextAsync(cookiePath, json);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
     }
 }

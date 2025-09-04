@@ -68,7 +68,8 @@ namespace AIWriter.Services.Implementations
                 Description = novelDto.Description,
                 UserId = userId,
                 Status = "Paused",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AutoPublish = novelDto.AutoPublish
             };
 
             _context.Novels.Add(novel);
@@ -89,6 +90,7 @@ namespace AIWriter.Services.Implementations
             novel.Description = novelDto.Description;
             novel.UserNovelPlatformId = novelDto.UserNovelPlatformId;
             novel.PlatformNumber = novelDto.PlatformNumber;
+            novel.AutoPublish = novelDto.AutoPublish;
             await _context.SaveChangesAsync();
             return _mapper.Map<NovelVo>(novel);
         }
@@ -145,8 +147,8 @@ namespace AIWriter.Services.Implementations
             var titleRegex = new Regex(@"(?:\*\*)?\s*(第[一二三四五六七八九十百千万〇零\d]+章\s+[^\r\n]+)", RegexOptions.Multiline);
             var match = titleRegex.Match(historyItem.Content);
 
-            string title="";
-            string content="";
+            string title = "";
+            string content = "";
 
             if (match.Success && match.Groups.Count > 1)
             {
@@ -155,7 +157,7 @@ namespace AIWriter.Services.Implementations
                 var contentArray = content.Split("---");
                 content = contentArray[contentArray.Length - 1];
             }
-                var messages = new List<Message>
+            var messages = new List<Message>
             {
                 new Message { Role = "system", Content = abstracter.Prompt },
                 new Message { Role = "user", Content = $"标题：\r\n{title}\r\n\r\n正文：\r\n{content}" }
