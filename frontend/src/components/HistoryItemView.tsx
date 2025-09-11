@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../services/api';
 import { Button, Input, Typography, Space, Popconfirm, message, Switch, Dropdown, Menu } from 'antd';
-import { EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined, BookOutlined, RedoOutlined, MoreOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined, BookOutlined, RedoOutlined, MoreOutlined, MessageOutlined } from '@ant-design/icons';
 import { toLocalTime } from '../utils/time';
 
 const { Text, Paragraph } = Typography;
@@ -74,6 +74,17 @@ const HistoryItemView: React.FC<HistoryItemViewProps> = ({ item, novelId, onUpda
         }
     };
 
+    const handleRewrite = async () => {
+        try {
+            await api.post(`/novels/${novelId}/workflow/history/${item.id}/rewrite`);
+            onUpdate();
+            message.success(t('重写成功'));
+        } catch (error) {
+            console.error("Failed to rewrite history item", error);
+            message.error(t("重写失败。"));
+        }
+    };
+
     const menu = (
         <Menu>
             <Menu.Item key="regenerate" icon={<RedoOutlined />} onClick={handleRegenerateAbstract}>{t('重新生成摘要')}</Menu.Item>
@@ -84,6 +95,7 @@ const HistoryItemView: React.FC<HistoryItemViewProps> = ({ item, novelId, onUpda
                     {t('删除')}
                 </Popconfirm>
             </Menu.Item>
+            <Menu.Item key="rewrite" icon={<MessageOutlined />} onClick={handleRewrite}>{t('重写')}</Menu.Item>
         </Menu>
     );
 
@@ -106,6 +118,7 @@ const HistoryItemView: React.FC<HistoryItemViewProps> = ({ item, novelId, onUpda
                                     onChange={setShowAbstract}
                                 />
                                 <Button icon={<RedoOutlined />} onClick={handleRegenerateAbstract} size="small" title={t('重新生成摘要')} />
+                                <Button icon={<MessageOutlined />} onClick={handleRewrite} size="small" title={t('重写')} />
                                 <Button icon={<EditOutlined />} onClick={() => setIsEditing(true)} size="small" title={t('修改')} />
                                 <Button icon={<BookOutlined />} onClick={() => onSaveAsChapter(item.content)} size="small" title={t('保存至章节')} />
                             </>

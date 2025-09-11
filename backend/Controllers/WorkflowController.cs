@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using AIWriter.Models;
 
 namespace AIWriter.Controllers
 {
@@ -94,6 +95,35 @@ namespace AIWriter.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+        
+        [HttpPost("history/{historyId}/rewrite")]
+        public async Task<IActionResult> RewriteHistory(int novelId, int historyId)
+        {
+            if (!await UserHasAccessToNovel(novelId)) return Forbid();
+
+            var historyItem = await _context.ConversationHistories.FindAsync(historyId);
+            if (historyItem == null || historyItem.NovelId != novelId) return NotFound();
+
+            var novel = await _context.Novels.Include(n => n.User).FirstOrDefaultAsync(n => n.Id == novelId);
+            if (novel == null) return NotFound();
+
+            var optimizer = await _context.Agents.FirstOrDefaultAsync(a => a.UserId == novel.UserId&&a.Order==1);
+            if (optimizer == null) return BadRequest("Optimizer agent not found.");
+
+            var newHistory = new ConversationHistory
+            {
+                NovelId = novelId,
+                AgentId = optimizer.Id,
+                Content = "不满意，请重写",
+                Timestamp = DateTime.UtcNow,
+                Abstract = "不满意，请重写"
+            };
+
+            _context.ConversationHistories.Add(newHistory);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
 
         private async Task<bool> UserHasAccessToNovel(int novelId)

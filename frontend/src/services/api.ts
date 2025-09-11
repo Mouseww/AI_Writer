@@ -1,3 +1,6 @@
+// 导入全局 navigate 引用
+import { navigateRef } from '../App';
+
 import axios from 'axios';
 
 const api = axios.create({
@@ -14,6 +17,26 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle 401 errors (authentication failure)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // 清除本地存储的 token
+      localStorage.removeItem('token');
+      
+      // 跳转到登录页面
+      if (navigateRef.current) {
+        navigateRef.current('/login', { replace: true });
+      } else {
+        // 备用方案：直接跳转
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
@@ -64,6 +87,22 @@ export const deleteUserNovelPlatform = (id: number) => {
 
 export const publishChapter = (novelId: number, chapterId: number) => {
   return api.post('/platforms/publish-chapter', { novelId, chapterId });
+};
+
+export const clearChapters = (novelId: number) => {
+  return api.delete(`/novels/${novelId}/chapters`);
+};
+
+export const clearHistory = (novelId: number) => {
+  return api.delete(`/novels/${novelId}/history`);
+};
+
+export const addUserMessage = (novelId: number, message: string) => {
+  return api.post(`/novels/${novelId}/history`, { message });
+};
+
+export const rewriteChapter = (novelId: number, chapterId: number) => {
+    return api.post(`/novels/${novelId}/chapters/${chapterId}/rewrite`);
 };
 
 export default api;

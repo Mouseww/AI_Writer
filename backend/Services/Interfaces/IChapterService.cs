@@ -55,5 +55,14 @@ namespace AIWriter.Services.Interfaces
         /// <param name="userId">The user ID.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         Task DeleteChapterAsync(int novelId, int chapterId, int userId);
+
+        /// <summary>
+        /// Rewrites the specified chapter.
+        /// </summary>
+        /// <param name="novelId">The novel ID.</param>
+        /// <param name="chapterId">The chapter ID.</param>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        Task RewriteChapterAsync(int novelId, int chapterId, int userId);
     }
 }

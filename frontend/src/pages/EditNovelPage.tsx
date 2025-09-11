@@ -36,7 +36,7 @@ const EditNovelPage: React.FC = () => {
                 const response = await getUserNovelPlatforms();
                 setUserPlatforms(response.data);
             } catch (error) {
-                antdMessage.error('Failed to fetch user platforms');
+                antdMessage.error(t('Failed to fetch user platforms'));
             }
         };
 
@@ -87,7 +87,7 @@ const EditNovelPage: React.FC = () => {
                         label={t('Platform')}
                         name="userNovelPlatformId"
                     >
-                        <Select placeholder="Select a platform" allowClear>
+                        <Select placeholder={t('Select a platform')} allowClear>
                             {userPlatforms.map(p => (
                                 <Option key={p.id} value={p.id}>{p.novelPlatformName} ({p.platformUserName})</Option>
                             ))}
@@ -96,11 +96,13 @@ const EditNovelPage: React.FC = () => {
                     <Form.Item
                         label={t('Platform Number')}
                         name="platformNumber"
+                        rules={[{ required: isAutoPublishEnabled, message: t('Please input platform number!') }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label={t('Auto Publish')}
+                        name="autoPublish"
                     >
                         <Switch
                             checked={autoPublish}

@@ -41,10 +41,9 @@ namespace AIWriter.Services.Implementations
                 .Select(up => new UserNovelPlatformDto
                 {
                     Id = up.Id,
-                    UserId = up.UserId,
                     NovelPlatformId = up.NovelPlatformId,
                     PlatformUserName = up.PlatformUserName,
-                    NovelPlatformName = up.NovelPlatform.Name
+                    NovelPlatformName=up.NovelPlatform.Name
                 })
                 .ToListAsync();
         }
@@ -67,10 +66,8 @@ namespace AIWriter.Services.Implementations
             return new UserNovelPlatformDto
             {
                 Id = userNovelPlatform.Id,
-                UserId = userNovelPlatform.UserId,
                 NovelPlatformId = userNovelPlatform.NovelPlatformId,
-                PlatformUserName = userNovelPlatform.PlatformUserName,
-                NovelPlatformName = platform.Name
+                PlatformUserName = userNovelPlatform.PlatformUserName
             };
         }
 
@@ -100,7 +97,7 @@ namespace AIWriter.Services.Implementations
             var platform = novel.UserNovelPlatform.NovelPlatform;
             var platformCredentials = novel.UserNovelPlatform;
 
-            await _publishingService.PublishChapterAsync(string.Format( platform.PublishUrl,novel.PlatformNumber), platformCredentials.PlatformUserName, platformCredentials.PlatformPassword, chapter.Title, chapter.Content);
+            await _publishingService.PublishChapterAsync(string.Format( platform.PublishUrl, novel.PlatformNumber), platformCredentials.PlatformUserName, platformCredentials.PlatformPassword, chapter.Title, chapter.Content);
         }
     }
 }

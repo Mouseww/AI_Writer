@@ -199,7 +199,7 @@ namespace AIWriter
                     throw new Exception("登录失败");
                 }
 
-                await page.WaitForSelectorAsync("span.left-input input");
+                await page.WaitForSelectorAsync("span.left-input > input");
 
                 string chapterNumber = ExtractChapterNumber(title).ToString();
                 await page.WaitForSelectorAsync("#___reactour > div:nth-child(3) > div > div > div.publish-guide-desc");

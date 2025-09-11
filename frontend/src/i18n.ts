@@ -15,12 +15,44 @@ const resources = {
       "AIWriter": "AIWriter",
 
       // DashboardPage
+      "dashboard": "Dashboard",
       "Title": "Title",
       "Status": "Status",
       "Word Count": "Word Count",
       "Action": "Action",
       "Edit": "Edit",
       "Create New Novel": "Create New Novel",
+      "totalNovels": "Total Novels",
+      "writingNovels": "Writing",
+      "completedNovels": "Completed",
+      "totalWords": "Total Words",
+      "words": "words",
+      "noNovelsYet": "No novels yet",
+      "startCreatingNovel": "Start creating your first novel and let AI help you write amazing stories!",
+      "createFirstNovel": "Create Your First Novel",
+      "loadingNovels": "Loading your novels...",
+      "fetchingCreativeWorks": "Fetching your creative works",
+      "loadingFailed": "Loading failed",
+      "retry": "Retry",
+      "noNovelsAvailable": "No novels available. Please try again or create your first novel.",
+      "noChaptersYet": "No chapters yet",
+      "writing": "Writing",
+      "finished": "Finished",
+      "paused": "Paused",
+      "draft": "Draft",
+      "start": "Start",
+      "pause": "Pause",
+      "startWriting": "Start Writing",
+      "pauseWriting": "Pause Writing",
+      "editNovel": "Edit Novel",
+      "confirmDeleteTitle": "Are you sure to delete this novel?",
+      "confirmDeleteDescription": "This action cannot be undone.",
+      "confirmDeleteOk": "Yes, delete",
+      "cancel": "Cancel",
+      "refreshList": "Refresh List",
+      "error": "Error",
+      "guest": "Guest",
+      "createNewNovel": "Create New Novel",
       "Failed to fetch novels. You might need to log in.": "Failed to fetch novels. You might need to log in.",
       "Failed to delete novel.": "Failed to delete novel.",
       "Failed to start writing.": "Failed to start writing.",
@@ -165,7 +197,40 @@ const resources = {
       // ChapterDetailPage
       "正在加载章节...": "Loading chapter...",
       "创建于:": "Created at:",
-      "最后更新于:": "Last updated at:"
+      "最后更新于:": "Last updated at:",
+
+      // PlatformsPage
+      "Platform Name": "Platform Name",
+      "Add Platform": "Add Platform",
+      "Add New Platform": "Add New Platform",
+      "Platform": "Platform",
+      "Please select a platform!": "Please select a platform!",
+      "Select a platform": "Select a platform",
+      "Please input your username!": "Please input your username!",
+      "Please input your password!": "Please input your password!",
+      "Failed to fetch user platforms": "Failed to fetch user platforms",
+      "Failed to fetch novel platforms": "Failed to fetch novel platforms",
+      "Platform added successfully": "Platform added successfully",
+      "Failed to add platform": "Failed to add platform",
+      "Platform deleted successfully": "Platform deleted successfully",
+      "Failed to delete platform": "Failed to delete platform",
+
+      // EditNovelPage additional
+      "Auto Publish": "Auto Publish",
+      "Platform Number": "Platform Number",
+      "Please input platform number!": "Please input platform number!",
+
+      // ChapterDetailPage
+      "Failed to fetch chapter": "Failed to fetch chapter",
+      "Chapter not found or failed to load.": "Chapter not found or failed to load.",
+
+      // App
+      "Platforms": "Platforms",
+      "Loading": "Loading",
+      "Logged out successfully": "Logged out successfully",
+      "Login successful": Login successful",
+      "Login failed": "Login failed",
+      "GitHub": "GitHub"
     }
   },
   zh: {
@@ -180,12 +245,44 @@ const resources = {
       "AIWriter": "AI作家",
 
       // DashboardPage
+      "dashboard": "仪表盘",
       "Title": "标题",
       "Status": "状态",
       "Word Count": "字数",
       "Action": "操作",
       "Edit": "编辑",
       "Create New Novel": "创建新小说",
+      "totalNovels": "小说总数",
+      "writingNovels": "写作中",
+      "completedNovels": "已完成",
+      "totalWords": "总字数",
+      "words": "字",
+      "noNovelsYet": "暂无小说",
+      "startCreatingNovel": "开始创建你的第一本小说，让AI帮助你创作精彩的故事！",
+      "createFirstNovel": "创建你的第一本小说",
+      "loadingNovels": "正在加载你的小说...",
+      "fetchingCreativeWorks": "正在获取你的创作作品",
+      "loadingFailed": "加载失败",
+      "retry": "重试",
+      "noNovelsAvailable": "暂无小说可用。请重试或创建你的第一本小说。",
+      "noChaptersYet": "暂无章节",
+      "writing": "写作中",
+      "finished": "已完成",
+      "paused": "已暂停",
+      "draft": "草稿",
+      "start": "开始",
+      "pause": "暂停",
+      "startWriting": "开始写作",
+      "pauseWriting": "暂停写作",
+      "editNovel": "编辑小说",
+      "confirmDeleteTitle": "你确定要删除这本小说吗？",
+      "confirmDeleteDescription": "此操作无法撤销。",
+      "confirmDeleteOk": "是的，删除",
+      "cancel": "取消",
+      "refreshList": "刷新列表",
+      "error": "错误",
+      "guest": "访客",
+      "createNewNovel": "创建新小说",
       "Failed to fetch novels. You might need to log in.": "获取小说列表失败，请尝试重新登录。",
       "Failed to delete novel.": "删除小说失败。",
       "Failed to start writing.": "开始写作失败。",
@@ -328,7 +425,40 @@ const resources = {
       // ChapterDetailPage
       "正在加载章节...": "正在加载章节...",
       "创建于:": "创建于:",
-      "最后更新于:": "最后更新于:"
+      "最后更新于:": "最后更新于:",
+
+      // PlatformsPage
+      "Platform Name": "平台名称",
+      "Add Platform": "添加平台",
+      "Add New Platform": "添加新平台",
+      "Platform": "平台",
+      "Please select a platform!": "请选择一个平台！",
+      "Select a platform": "选择一个平台",
+      "Please input your username!": "请输入您的用户名！",
+      "Please input your password!": "请输入您的密码！",
+      "Failed to fetch user platforms": "获取用户平台失败",
+      "Failed to fetch novel platforms": "获取小说平台失败",
+      "Platform added successfully": "平台添加成功",
+      "Failed to add platform": "添加平台失败",
+      "Platform deleted successfully": "平台删除成功",
+      "Failed to delete platform": "删除平台失败",
+
+      // EditNovelPage additional
+      "Auto Publish": "自动发布",
+      "Platform Number": "平台编号",
+      "Please input platform number!": "请输入平台编号！",
+
+      // ChapterDetailPage
+      "Failed to fetch chapter": "获取章节失败",
+      "Chapter not found or failed to load.": "章节未找到或加载失败。",
+
+      // App
+      "Platforms": "平台",
+      "Loading": "加载中",
+      "Logged out successfully": "登出成功",
+      "Login successful": "登录成功",
+      "Login failed": "登录失败",
+      "GitHub": "GitHub"
     }
   }
 };

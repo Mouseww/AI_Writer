@@ -170,5 +170,44 @@ namespace AIWriter.Services.Implementations
 
             return true;
         }
+
+        public async Task ClearChaptersAsync(int novelId, int userId)
+        {
+            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == novelId && n.UserId == userId);
+            if (novel == null) return;
+
+            var chapters = await _context.Chapters.Where(c => c.NovelId == novelId).ToListAsync();
+            _context.Chapters.RemoveRange(chapters);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ClearHistoryAsync(int novelId, int userId)
+        {
+            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == novelId && n.UserId == userId);
+            if (novel == null) return;
+
+            var histories = await _context.ConversationHistories.Where(h => h.NovelId == novelId).ToListAsync();
+            _context.ConversationHistories.RemoveRange(histories);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddUserMessageAsync(int novelId, int userId, string message)
+        {
+            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == novelId && n.UserId == userId);
+            if (novel == null) return;
+
+            var historyItem = new ConversationHistory
+            {
+                NovelId = novelId,
+                Content = message,
+                Timestamp = DateTime.UtcNow,
+                Abstract= message,
+                IsUserMessage = true,
+                ShowInHistory=true
+            };
+
+            _context.ConversationHistories.Add(historyItem);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -14,16 +14,18 @@ const ChapterDetailPage: React.FC = () => {
 
     useEffect(() => {
         const fetchChapter = async () => {
-            if (novelId && chapterId) {
+            if (novelId && chapterId && !isNaN(parseInt(chapterId))) {
                 setLoading(true);
                 try {
                     const response = await getChapter(parseInt(novelId), parseInt(chapterId));
                     setChapter(response.data);
                 } catch (error) {
-                    console.error(t("Failed to fetch chapter"), error);
+                    console.error(t('Failed to fetch chapter'), error);
                 } finally {
                     setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
 
@@ -35,7 +37,7 @@ const ChapterDetailPage: React.FC = () => {
     }
 
     if (!chapter) {
-        return <p>{t('正在加载章节...')}</p>;
+        return <p>{t('Chapter not found or failed to load.')}</p>;
     }
 
     return (

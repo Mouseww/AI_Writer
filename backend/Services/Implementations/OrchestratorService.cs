@@ -148,10 +148,10 @@ namespace AIWriter.Services.Implementations // Updated namespace
                             content = contentArray[contentArray.Length - 1];
 
 
-                            if (content.GetChineseCharCount() < 4000)
+                            if (content.GetChineseCharCount() < 2500)
                             {
                                 passed = false;
-                                history[0].Content = "不满意, 字数不足6000字，请重写此章";
+                                history[0].Content = "不满意, 字数不足4000字，请重写此章";
                                 continue;
                             }
 

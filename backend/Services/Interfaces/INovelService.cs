@@ -15,5 +15,8 @@ namespace AIWriter.Services.Interfaces
         Task<NovelVo> UpdateNovelAsync(int novelId, NovelUpdateDto novelDto, int userId);
         Task DeleteNovelAsync(int novelId, int userId);
         Task<bool> RegenerateAbstractAsync(int novelId, int historyId, int userId);
+        Task ClearChaptersAsync(int novelId, int userId);
+        Task ClearHistoryAsync(int novelId, int userId);
+        Task AddUserMessageAsync(int novelId, int userId, string message);
     }
 }

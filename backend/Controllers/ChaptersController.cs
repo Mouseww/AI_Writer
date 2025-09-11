@@ -86,5 +86,13 @@ namespace AIWriter.Controllers
             await _chapterService.DeleteChapterAsync(novelId, chapterId, userId);
             return NoContent();
         }
+
+        [HttpPost("{chapterId}/rewrite")]
+        public async Task<IActionResult> RewriteChapter(int novelId, int chapterId)
+        {
+            var userId = GetUserId();
+            await _chapterService.RewriteChapterAsync(novelId, chapterId, userId);
+            return Ok();
+        }
     }
 }

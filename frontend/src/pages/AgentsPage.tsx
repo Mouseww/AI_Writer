@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 const AgentsPage: React.FC = () => {
     const { t } = useTranslation();
+
     return (
         <div>
             <h2>{t('Manage AI Agents')}</h2>

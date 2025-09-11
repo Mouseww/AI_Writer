@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Agent } from '../types';
-import { Button, Modal, Form, Input, Select, InputNumber, Table, Space, Popconfirm, message, Dropdown, Menu } from 'antd';
+import { Button, Modal, Form, Input, Select, InputNumber, Table, Space, Popconfirm, message, Dropdown, Menu, Spin } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +20,7 @@ const AgentManager: React.FC = () => {
     const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
     const [form] = Form.useForm();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const handleResize = () => {
@@ -30,22 +31,28 @@ const AgentManager: React.FC = () => {
     }, []);
 
     const fetchAgents = async () => {
+        setLoading(true);
         try {
             const response = await api.get(`/agents`);
             setAgents(response.data);
         } catch (error) {
             console.error("Failed to fetch agents", error);
             message.error(t('Failed to fetch agents'));
+        } finally {
+            setLoading(false);
         }
     };
 
     const fetchModels = async () => {
+        setLoading(true);
         try {
             const response = await api.get(`/agents/models`);
             setModels(response.data.data);
         } catch (error) {
             console.error("Failed to fetch models", error);
             message.error(t('Failed to fetch models'));
+        } finally {
+            setLoading(false);
         }
     };
 

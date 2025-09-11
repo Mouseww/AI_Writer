@@ -94,5 +94,49 @@ namespace AIWriter.Services.Implementations
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task RewriteChapterAsync(int novelId, int chapterId, int userId)
+        {
+            var chapter = await _context.Chapters
+                                        .Include(c => c.Novel)
+                                        .FirstOrDefaultAsync(c => c.Id == chapterId && c.NovelId == novelId && c.Novel.UserId == userId);
+
+            if (chapter != null)
+            {
+                var novel = chapter.Novel;
+                var lastTwoChapters = await _context.Chapters
+                                                    .Where(c => c.NovelId == novelId && c.Order < chapter.Order)
+                                                    .OrderByDescending(c => c.Order)
+                                                    .Take(2)
+                                                    .ToListAsync();
+
+                var prompt = $"请根据以下信息，重写章节内容：\n\n" +
+                             $"小说标题：{novel.Title}\n" +
+                             $"小说描述：{novel.Description}\n\n";
+
+                if (lastTwoChapters.Any())
+                {
+                    prompt += "前两章内容：\n";
+                    foreach (var prevChapter in lastTwoChapters)
+                    {
+                        prompt += $"标题：{prevChapter.Title}\n内容：{prevChapter.Content}\n\n";
+                    }
+                }
+
+                prompt += $"当前章节标题：{chapter.Title}\n" +
+                          $"请重写这一章的内容。";
+
+                var historyItem = new ConversationHistory
+                {
+                    NovelId = novelId,
+                    Content = prompt,
+                    Timestamp = DateTime.UtcNow,
+                    IsUserMessage = true
+                };
+
+                _context.ConversationHistories.Add(historyItem);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

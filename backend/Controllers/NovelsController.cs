@@ -122,7 +122,29 @@ namespace AIWriter.Controllers
         // DELETE: api/novels/5/chapters/1
         
 
-        
+        [HttpDelete("{id}/chapters")]
+        public async Task<IActionResult> ClearChapters(int id)
+        {
+            var userId = GetUserId();
+            await _novelService.ClearChaptersAsync(id, userId);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/history")]
+        public async Task<IActionResult> ClearHistory(int id)
+        {
+            var userId = GetUserId();
+            await _novelService.ClearHistoryAsync(id, userId);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/history")]
+        public async Task<IActionResult> AddUserMessage(int id, [FromBody] UserMessageDto dto)
+        {
+            var userId = GetUserId();
+            await _novelService.AddUserMessageAsync(id, userId, dto.Message);
+            return Ok();
+        }
 
         [HttpPost("{id}/workflow/history/{historyId}/regenerate-abstract")]
         public async Task<IActionResult> RegenerateAbstract(int id, int historyId)
